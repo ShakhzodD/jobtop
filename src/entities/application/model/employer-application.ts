@@ -8,5 +8,8 @@ export type EmployerApplication = {
     fullName: string;
     telegramUsername: string | null;
     district: string | null;
+    birthDate: string | null;
+    experienceYears: number | null;
+    about: string | null;
   } | null;
 };

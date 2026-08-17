@@ -21,7 +21,7 @@ export async function GET(
     const { data, error } = await supabase
       .from("applications")
       .select(
-        "id, status, note, created_at, worker:users!applications_worker_id_fkey(id, full_name, telegram_username, district)",
+        "id, status, note, created_at, worker:users!applications_worker_id_fkey(id, full_name, telegram_username, district, birth_date, experience_years, about)",
       )
       .eq("job_id", jobId)
       .order("created_at", { ascending: false });

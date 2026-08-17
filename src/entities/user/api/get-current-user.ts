@@ -12,10 +12,12 @@ async function requestProfile(options?: RequestInit) {
       ...options?.headers,
     },
   });
+
   const body = (await response.json()) as {
     user?: CurrentUser;
     error?: string;
   };
+
   if (!response.ok) throw new Error(body.error ?? "Unable to load profile");
   return body;
 }
@@ -25,8 +27,10 @@ export async function getCurrentUser() {
 }
 
 export async function updateCurrentUserRole(role: UserRole, addRole = false) {
-  await requestProfile({
-    method: "PUT",
-    body: JSON.stringify({ role, addRole }),
-  });
+  return (
+    await requestProfile({
+      method: "PUT",
+      body: JSON.stringify({ role, addRole }),
+    })
+  ).user!;
 }

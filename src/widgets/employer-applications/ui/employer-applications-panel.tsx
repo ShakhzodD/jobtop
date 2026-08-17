@@ -25,6 +25,21 @@ const statusLabel: Record<EmployerJob["status"], string> = {
   cancelled: "Rad etilgan",
 };
 
+function getAge(birthDate: string | null) {
+  if (!birthDate) return null;
+  const birth = new Date(`${birthDate}T00:00:00`);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDifference = today.getMonth() - birth.getMonth();
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && today.getDate() < birth.getDate())
+  ) {
+    age -= 1;
+  }
+  return age >= 0 ? age : null;
+}
+
 export function EmployerApplicationsPanel() {
   const [jobs, setJobs] = useState<EmployerJob[] | null>(null);
   const [selectedJob, setSelectedJob] = useState<EmployerJob | null>(null);
@@ -158,6 +173,16 @@ export function EmployerApplicationsPanel() {
                         <MapPin className="size-3" />
                         {application.worker?.district ?? "Tuman ko‘rsatilmagan"}
                       </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {[
+                          getAge(application.worker?.birthDate ?? null) &&
+                            `${getAge(application.worker?.birthDate ?? null)} yosh`,
+                          application.worker?.experienceYears != null &&
+                            `${application.worker.experienceYears} yil tajriba`,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ") || "Qo‘shimcha ma’lumot kiritilmagan"}
+                      </p>
                     </div>
                     {isSelected && (
                       <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-800">
@@ -168,6 +193,11 @@ export function EmployerApplicationsPanel() {
                   {application.note && (
                     <p className="mt-3 rounded-xl bg-muted p-3 text-sm text-muted-foreground">
                       {application.note}
+                    </p>
+                  )}
+                  {application.worker?.about && (
+                    <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                      {application.worker.about}
                     </p>
                   )}
                   {!isSelected && (

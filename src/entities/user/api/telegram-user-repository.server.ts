@@ -17,7 +17,9 @@ export async function upsertTelegramUser(
       },
       { onConflict: "telegram_id" },
     )
-    .select("id, telegram_id, full_name, telegram_username, phone, active_role")
+    .select(
+      "id, telegram_id, full_name, telegram_username, phone, birth_date, district, experience_years, about, active_role",
+    )
     .single();
 
   if (error) throw error;
@@ -28,6 +30,10 @@ export async function upsertTelegramUser(
     fullName: data.full_name,
     telegramUsername: data.telegram_username,
     phone: data.phone,
+    birthDate: data.birth_date,
+    district: data.district,
+    experienceYears: data.experience_years,
+    about: data.about,
     activeRole: data.active_role,
     roles,
   };

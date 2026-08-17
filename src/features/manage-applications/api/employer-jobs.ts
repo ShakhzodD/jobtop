@@ -34,7 +34,15 @@ export async function getJobApplications(
       status: EmployerApplication["status"];
       note: string | null;
       created_at: string;
-      worker: EmployerApplication["worker"];
+      worker: {
+        id: string;
+        full_name: string;
+        telegram_username: string | null;
+        district: string | null;
+        birth_date: string | null;
+        experience_years: number | null;
+        about: string | null;
+      } | null;
     }>;
     error?: string;
   };
@@ -44,6 +52,16 @@ export async function getJobApplications(
     status: application.status,
     note: application.note,
     createdAt: application.created_at,
-    worker: application.worker,
+    worker: application.worker
+      ? {
+          id: application.worker.id,
+          fullName: application.worker.full_name,
+          telegramUsername: application.worker.telegram_username,
+          district: application.worker.district,
+          birthDate: application.worker.birth_date,
+          experienceYears: application.worker.experience_years,
+          about: application.worker.about,
+        }
+      : null,
   }));
 }

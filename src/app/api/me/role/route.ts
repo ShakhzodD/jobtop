@@ -35,7 +35,13 @@ export async function PUT(request: NextRequest) {
     const selectedRole = parseRole(role);
     if (addRole === true) await addUserRole(user.id, selectedRole);
     await setActiveUserRole(user.id, selectedRole);
-    return NextResponse.json({ ok: true });
+    const updatedUser = await getCurrentUserFromRequest(request);
+    return NextResponse.json({
+      user: {
+        ...updatedUser,
+        isAdmin: isTelegramAdmin(updatedUser.telegramId),
+      },
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to update role";

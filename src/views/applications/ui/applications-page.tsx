@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getCurrentUser } from "@/entities/user/api/get-current-user";
-import type { CurrentUser } from "@/entities/user/model/types";
+import { useUserStore } from "@/entities/user/model/user-store";
 import { ApplicationsPanel } from "@/widgets/role-dashboard/ui/applications-panel";
 
 export function ApplicationsPage() {
-  const [user, setUser] = useState<CurrentUser | null>(null);
-  useEffect(() => {
-    getCurrentUser()
-      .then(setUser)
-      .catch(() => setUser(null));
-  }, []);
+  const user = useUserStore((state) => state.user);
+  const status = useUserStore((state) => state.status);
+  if (status !== "ready") {
+    return (
+      <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
+        Profil yuklanmoqda...
+      </section>
+    );
+  }
   return (
     <section className="pt-2">
       <ApplicationsPanel

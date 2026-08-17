@@ -1,39 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "@bprogress/next/app";
 import { BriefcaseBusiness, ShieldCheck, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  getCurrentUser,
-  updateCurrentUserRole,
-} from "@/entities/user/api/get-current-user";
-import type { CurrentUser, UserRole } from "@/entities/user/model/types";
+import { updateCurrentUserRole } from "@/entities/user/api/get-current-user";
+import type { UserRole } from "@/entities/user/model/types";
+import { useUserStore } from "@/entities/user/model/user-store";
 import { RoleProfilePanel } from "@/features/profile/ui/role-profile-panel";
+import { WorkerProfileForm } from "@/features/profile/ui/worker-profile-form";
 
 export function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<CurrentUser | null>(null);
-  const [busy, setBusy] = useState(true);
-
-  useEffect(() => {
-    getCurrentUser()
-      .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => setBusy(false));
-  }, []);
+  const user = useUserStore((state) => state.user);
+  const status = useUserStore((state) => state.status);
+  const setUser = useUserStore((state) => state.setUser);
+  const [busy, setBusy] = useState(false);
 
   async function selectRole(role: UserRole, addRole = false) {
     setBusy(true);
     try {
-      await updateCurrentUserRole(role, addRole);
-      setUser(await getCurrentUser());
+      setUser(await updateCurrentUserRole(role, addRole));
     } finally {
       setBusy(false);
     }
   }
 
-  if (busy && !user)
+  if (status !== "ready")
     return (
       <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
         Profil yuklanmoqda...
@@ -62,6 +55,7 @@ export function ProfilePage() {
         </div>
       </div>
       <RoleProfilePanel busy={busy} onSelectRole={selectRole} user={user} />
+      {user.roles.includes("worker") && <WorkerProfileForm user={user} />}
       {user.activeRole === "employer" && (
         <Button
           className="mt-5 h-12 w-full bg-emerald-700 hover:bg-emerald-800"

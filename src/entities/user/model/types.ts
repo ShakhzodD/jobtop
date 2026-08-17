@@ -6,6 +6,10 @@ export type CurrentUser = {
   fullName: string;
   telegramUsername: string | null;
   phone: string | null;
+  birthDate: string | null;
+  district: string | null;
+  experienceYears: number | null;
+  about: string | null;
   activeRole: UserRole;
   roles: UserRole[];
   isAdmin?: boolean;

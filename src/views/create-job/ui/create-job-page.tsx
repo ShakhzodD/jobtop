@@ -1,22 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "@bprogress/next/app";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "@/entities/user/api/get-current-user";
-import type { CurrentUser } from "@/entities/user/model/types";
+import { useUserStore } from "@/entities/user/model/user-store";
 import { CreateJobForm } from "@/features/create-job/ui/create-job-form";
 
 export function CreateJobPage() {
   const router = useRouter();
-  const [user, setUser] = useState<CurrentUser | null | undefined>(undefined);
-  useEffect(() => {
-    getCurrentUser()
-      .then(setUser)
-      .catch(() => setUser(null));
-  }, []);
-  if (user === undefined)
+  const user = useUserStore((state) => state.user);
+  const status = useUserStore((state) => state.status);
+  if (status !== "ready")
     return (
       <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
         Tekshirilmoqda...
