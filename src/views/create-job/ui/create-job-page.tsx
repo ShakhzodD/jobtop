@@ -8,7 +8,7 @@ import { CreateJobForm } from "@/features/create-job/ui/create-job-form";
 
 export function CreateJobPage() {
   const router = useRouter();
-  const user = useUserStore((state) => state.user);
+  const user = useUserStore(state => state.user);
   if (user?.activeRole !== "employer")
     return (
       <section className="grid min-h-64 place-items-center gap-3 rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 p-7 text-center">
@@ -39,7 +39,7 @@ export function CreateJobPage() {
           Ma’lumotlar admin tomonidan tekshiriladi.
         </span>
       </div>
-      <CreateJobForm onCreated={() => router.replace("/profile")} />
+      <CreateJobForm onCreated={() => router.back()} />
     </section>
   );
 }
