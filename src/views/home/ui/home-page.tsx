@@ -5,6 +5,7 @@ import { getJobsFromApi } from "@/entities/job/api/get-jobs";
 import { getMockJobs } from "@/entities/job/api/mock-job-repository";
 import type { Job } from "@/entities/job/model/types";
 import { createApplication } from "@/features/apply-to-job/api/create-application";
+import { createGroupApplication } from "@/features/apply-to-job/api/create-group-application";
 import {
   CategoryFilter,
   type CategoryFilterValue,
@@ -51,6 +52,12 @@ export function HomePage() {
     }
   }
 
+  async function applyGroupToJob(usernames: string[]) {
+    if (!activeJob) return;
+    await createGroupApplication(activeJob.id, usernames);
+    setApplications((current) => [...current, activeJob.id]);
+  }
+
   return (
     <>
       <header className="flex min-h-10 items-center justify-between">
@@ -89,6 +96,7 @@ export function HomePage() {
           applied={applications.includes(activeJob.id)}
           error={applicationError}
           onApply={applyToJob}
+          onApplyGroup={applyGroupToJob}
           onClose={() => setActiveJob(null)}
         />
       )}

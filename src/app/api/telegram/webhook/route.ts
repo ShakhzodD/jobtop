@@ -96,6 +96,63 @@ async function saveInitialRole(
   await setActiveUserRole(data.id, role);
 }
 
+async function updateGroupMember(
+  telegramId: number,
+  groupId: string,
+  action: "accept" | "decline",
+) {
+  const supabase = createSupabaseServerClient();
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("id")
+    .eq("telegram_id", telegramId)
+    .maybeSingle();
+  if (userError) throw userError;
+  if (!user) throw new Error("Foydalanuvchi topilmadi");
+
+  const { data: membership, error: membershipError } = await supabase
+    .from("group_application_members")
+    .select("status")
+    .eq("group_application_id", groupId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (membershipError) throw membershipError;
+  if (!membership || membership.status !== "pending")
+    throw new Error("Bu taklif endi faol emas");
+
+  const nextStatus = action === "accept" ? "accepted" : "declined";
+  const { error: updateError } = await supabase
+    .from("group_application_members")
+    .update({ status: nextStatus })
+    .eq("group_application_id", groupId)
+    .eq("user_id", user.id);
+  if (updateError) throw updateError;
+
+  if (action === "decline") {
+    await supabase
+      .from("group_applications")
+      .update({ status: "cancelled" })
+      .eq("id", groupId)
+      .eq("status", "pending_members");
+    return "Guruh arizasini rad etdingiz.";
+  }
+
+  const { count, error: pendingError } = await supabase
+    .from("group_application_members")
+    .select("user_id", { count: "exact", head: true })
+    .eq("group_application_id", groupId)
+    .eq("status", "pending");
+  if (pendingError) throw pendingError;
+  if ((count ?? 0) === 0) {
+    await supabase
+      .from("group_applications")
+      .update({ status: "ready" })
+      .eq("id", groupId)
+      .eq("status", "pending_members");
+  }
+  return "Qatnashishingiz tasdiqlandi. Ish beruvchi guruhni tanlagach, sizga xabar boradi.";
+}
+
 export async function POST(request: NextRequest) {
   if (
     !isValidTelegramWebhookSecret(
@@ -108,6 +165,24 @@ export async function POST(request: NextRequest) {
   try {
     const update = (await request.json()) as TelegramUpdate;
     const callback = update.callback_query;
+    if (callback?.data?.startsWith("group:")) {
+      const [, groupId, action] = callback.data.split(":");
+      if (
+        !groupId ||
+        (action !== "accept" && action !== "decline") ||
+        !callback.message
+      ) {
+        return NextResponse.json({ ok: true });
+      }
+      const message = await updateGroupMember(
+        callback.from.id,
+        groupId,
+        action,
+      );
+      await answerTelegramCallbackQuery(callback.id);
+      await sendTelegramBotMessage(callback.message.chat.id, message);
+      return NextResponse.json({ ok: true });
+    }
     if (callback?.data?.startsWith("role:") && callback.message) {
       const role = callback.data === "role:employer" ? "employer" : "worker";
       await saveInitialRole(callback.from, role);

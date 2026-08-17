@@ -21,9 +21,10 @@ export async function getEmployerJobs(): Promise<EmployerJob[]> {
   return body.jobs ?? [];
 }
 
-export async function getJobApplications(
-  jobId: string,
-): Promise<EmployerApplication[]> {
+export async function getJobApplications(jobId: string): Promise<{
+  applications: EmployerApplication[];
+  groupApplications: GroupApplication[];
+}> {
   const response = await fetch(`/api/jobs/${jobId}/applications`, {
     cache: "no-store",
     headers: telegramHeaders(),
@@ -44,24 +45,75 @@ export async function getJobApplications(
         about: string | null;
       } | null;
     }>;
+    groupApplications?: Array<{
+      id: string;
+      status: "pending_members" | "ready" | "selected" | "cancelled";
+      member_count: number;
+      members: Array<{
+        status: string;
+        user: {
+          full_name: string;
+          district: string | null;
+          birth_date: string | null;
+          experience_years: number | null;
+          about: string | null;
+        } | null;
+      }>;
+    }>;
     error?: string;
   };
   if (!response.ok) throw new Error(body.error ?? "Arizalarni yuklab bo‘lmadi");
-  return (body.applications ?? []).map((application) => ({
-    id: application.id,
-    status: application.status,
-    note: application.note,
-    createdAt: application.created_at,
-    worker: application.worker
-      ? {
-          id: application.worker.id,
-          fullName: application.worker.full_name,
-          telegramUsername: application.worker.telegram_username,
-          district: application.worker.district,
-          birthDate: application.worker.birth_date,
-          experienceYears: application.worker.experience_years,
-          about: application.worker.about,
-        }
-      : null,
-  }));
+  return {
+    applications: (body.applications ?? []).map((application) => ({
+      id: application.id,
+      status: application.status,
+      note: application.note,
+      createdAt: application.created_at,
+      worker: application.worker
+        ? {
+            id: application.worker.id,
+            fullName: application.worker.full_name,
+            telegramUsername: application.worker.telegram_username,
+            district: application.worker.district,
+            birthDate: application.worker.birth_date,
+            experienceYears: application.worker.experience_years,
+            about: application.worker.about,
+          }
+        : null,
+    })),
+    groupApplications: (body.groupApplications ?? []).map((group) => ({
+      id: group.id,
+      status: group.status,
+      memberCount: group.member_count,
+      members: group.members.map((member) => ({
+        status: member.status,
+        user: member.user,
+      })),
+    })),
+  };
+}
+
+export type GroupApplication = {
+  id: string;
+  status: "pending_members" | "ready" | "selected" | "cancelled";
+  memberCount: number;
+  members: Array<{
+    status: string;
+    user: {
+      full_name: string;
+      district: string | null;
+      birth_date: string | null;
+      experience_years: number | null;
+      about: string | null;
+    } | null;
+  }>;
+};
+
+export async function selectGroupApplication(groupId: string) {
+  const response = await fetch(`/api/group-applications/${groupId}/select`, {
+    method: "PATCH",
+    headers: telegramHeaders(),
+  });
+  const body = (await response.json()) as { error?: string };
+  if (!response.ok) throw new Error(body.error ?? "Guruhni tanlab bo‘lmadi");
 }

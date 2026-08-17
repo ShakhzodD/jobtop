@@ -26,7 +26,15 @@ export async function GET(
       .eq("job_id", jobId)
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return NextResponse.json({ applications: data });
+    const { data: groupApplications, error: groupError } = await supabase
+      .from("group_applications")
+      .select(
+        "id, status, member_count, members:group_application_members(status, user:users!group_application_members_user_id_fkey(full_name, district, birth_date, experience_years, about))",
+      )
+      .eq("job_id", jobId)
+      .order("created_at", { ascending: false });
+    if (groupError) throw groupError;
+    return NextResponse.json({ applications: data, groupApplications });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Arizalarni yuklab bo‘lmadi";

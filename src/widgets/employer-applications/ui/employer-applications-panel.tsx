@@ -15,6 +15,8 @@ import type { EmployerJob } from "@/entities/job/model/types";
 import {
   getEmployerJobs,
   getJobApplications,
+  selectGroupApplication,
+  type GroupApplication,
 } from "@/features/manage-applications/api/employer-jobs";
 import { selectWorker } from "@/features/select-worker/api/select-worker";
 
@@ -46,6 +48,9 @@ export function EmployerApplicationsPanel() {
   const [applications, setApplications] = useState<
     EmployerApplication[] | null
   >(null);
+  const [groupApplications, setGroupApplications] = useState<
+    GroupApplication[]
+  >([]);
   const [busyApplicationId, setBusyApplicationId] = useState<string>();
   const [error, setError] = useState("");
 
@@ -66,7 +71,9 @@ export function EmployerApplicationsPanel() {
     setApplications(null);
     setError("");
     try {
-      setApplications(await getJobApplications(job.id));
+      const response = await getJobApplications(job.id);
+      setApplications(response.applications);
+      setGroupApplications(response.groupApplications);
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -107,6 +114,35 @@ export function EmployerApplicationsPanel() {
         requestError instanceof Error
           ? requestError.message
           : "Nomzod tanlab bo‘lmadi",
+      );
+    } finally {
+      setBusyApplicationId(undefined);
+    }
+  }
+
+  async function handleSelectGroup(group: GroupApplication) {
+    if (!selectedJob) return;
+    setBusyApplicationId(group.id);
+    try {
+      await selectGroupApplication(group.id);
+      setGroupApplications((current) =>
+        current.map((item) =>
+          item.id === group.id ? { ...item, status: "selected" } : item,
+        ),
+      );
+      setSelectedJob((current) =>
+        current
+          ? {
+              ...current,
+              selectedCount: current.selectedCount + group.memberCount,
+            }
+          : null,
+      );
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Guruhni tanlab bo‘lmadi",
       );
     } finally {
       setBusyApplicationId(undefined);
@@ -155,8 +191,63 @@ export function EmployerApplicationsPanel() {
           <p className="py-8 text-center text-sm text-muted-foreground">
             Arizalar yuklanmoqda...
           </p>
-        ) : applications.length ? (
+        ) : applications.length || groupApplications.length ? (
           <div className="grid gap-3">
+            {groupApplications.map((group) => (
+              <article
+                className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4"
+                key={group.id}
+              >
+                <h3 className="font-semibold">
+                  Guruh arizasi · {group.memberCount} kishi
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {group.status === "ready"
+                    ? "Barcha a’zolar tasdiqlagan"
+                    : group.status === "selected"
+                      ? "Guruh tanlangan"
+                      : "A’zolar tasdiqlashi kutilmoqda"}
+                </p>
+                <div className="mt-3 grid gap-2">
+                  {group.members.map((member, index) => (
+                    <div
+                      className="rounded-xl bg-card p-3 text-sm"
+                      key={`${group.id}-${index}`}
+                    >
+                      <b>
+                        {member.user?.full_name ?? "Noma’lum foydalanuvchi"}
+                      </b>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {member.user?.district ?? "Tuman ko‘rsatilmagan"} ·{" "}
+                        {member.user?.birth_date
+                          ? `${getAge(member.user.birth_date)} yosh`
+                          : "Yoshi kiritilmagan"}{" "}
+                        · {member.user?.experience_years ?? 0} yil tajriba
+                      </p>
+                      {member.user?.about && (
+                        <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                          {member.user.about}
+                        </p>
+                      )}
+                      <span className="mt-2 inline-block text-[11px] font-semibold text-emerald-800">
+                        {member.status === "pending"
+                          ? "⏳ Tasdiqlash kutilmoqda"
+                          : "✓ Tasdiqlagan"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {group.status === "ready" && (
+                  <Button
+                    className="mt-3 w-full bg-emerald-700 hover:bg-emerald-800"
+                    disabled={!canSelect || busyApplicationId === group.id}
+                    onClick={() => handleSelectGroup(group)}
+                  >
+                    <UsersRound /> Guruhni tanlash
+                  </Button>
+                )}
+              </article>
+            ))}
             {applications.map((application) => {
               const isSelected = application.status === "selected";
               return (

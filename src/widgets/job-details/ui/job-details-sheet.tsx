@@ -1,5 +1,8 @@
+"use client";
+
 import type { Job } from "@/entities/job/model/types";
 import { ApplyToJobButton } from "@/features/apply-to-job/ui/apply-to-job-button";
+import { GroupApplicationForm } from "@/features/apply-to-job/ui/group-application-form";
 import { formatMoney } from "@/shared/lib/format-money";
 
 type Props = {
@@ -15,6 +18,7 @@ type Props = {
   applied: boolean;
   error?: string;
   onApply: () => void | Promise<void>;
+  onApplyGroup: (usernames: string[]) => Promise<void>;
   onClose: () => void;
 };
 
@@ -24,6 +28,7 @@ export function JobDetailsSheet({
   applied,
   error,
   onApply,
+  onApplyGroup,
   onClose,
 }: Props) {
   return (
@@ -82,6 +87,9 @@ export function JobDetailsSheet({
           appliedLabel={text.applied}
           onApply={onApply}
         />
+        {!applied && (
+          <GroupApplicationForm disabled={applied} onSubmit={onApplyGroup} />
+        )}
       </section>
     </div>
   );
