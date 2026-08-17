@@ -5,6 +5,7 @@ export type CurrentUser = {
   telegramId: number;
   fullName: string;
   telegramUsername: string | null;
+  avatarUrl: string | null;
   phone: string | null;
   birthDate: string | null;
   district: string | null;

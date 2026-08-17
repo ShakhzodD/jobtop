@@ -27,7 +27,10 @@ export async function PATCH(request: NextRequest) {
   try {
     const user = await getCurrentUserFromRequest(request);
     const body = (await request.json()) as Record<string, unknown>;
-    const categories = parseCategories(body.categories);
+    const hasWorkerDetails = Array.isArray(body.categories);
+    const categories = hasWorkerDetails
+      ? parseCategories(body.categories)
+      : undefined;
     const birthDate = optionalText(body.birthDate, 10);
     const experienceYears =
       body.experienceYears === "" || body.experienceYears == null
@@ -46,14 +49,27 @@ export async function PATCH(request: NextRequest) {
       throw new Error("Tajriba 0 dan 60 yilgacha bo‘lishi kerak");
     }
 
+    const fullName = optionalText(body.fullName, 80);
+    const avatarUrl = optionalText(body.avatarUrl, 500);
+    if (avatarUrl && !avatarUrl.startsWith("https://")) {
+      throw new Error("Rasm manzili noto‘g‘ri");
+    }
+
+    const workerDetails = hasWorkerDetails
+      ? {
+          birth_date: birthDate,
+          district: optionalText(body.district, 80),
+          experience_years: experienceYears,
+          about: optionalText(body.about, 500),
+          worker_categories: categories,
+        }
+      : {};
     const { error } = await createSupabaseServerClient()
       .from("users")
       .update({
-        birth_date: birthDate,
-        district: optionalText(body.district, 80),
-        experience_years: experienceYears,
-        about: optionalText(body.about, 500),
-        worker_categories: categories,
+        full_name: fullName ?? user.fullName,
+        avatar_url: avatarUrl ?? user.avatarUrl,
+        ...workerDetails,
       })
       .eq("id", user.id);
     if (error) throw error;

@@ -7,6 +7,7 @@ type Props = {
   user: CurrentUser;
   busy?: boolean;
   onSelectRole: (role: UserRole, addRole?: boolean) => void;
+  onEdit: () => void;
 };
 
 const roleCopy: Record<
@@ -25,22 +26,33 @@ const roleCopy: Record<
   },
 };
 
-export function RoleProfilePanel({ user, busy, onSelectRole }: Props) {
+export function RoleProfilePanel({ user, busy, onSelectRole, onEdit }: Props) {
   const otherRole: UserRole =
     user.activeRole === "worker" ? "employer" : "worker";
 
   return (
     <section className="mt-1">
       <div className="mb-5 flex items-center gap-3">
-        <span className="grid size-11 place-items-center rounded-full bg-emerald-50 font-black text-emerald-800">
-          {user.fullName.slice(0, 1).toUpperCase()}
+        <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-emerald-50 font-black text-emerald-800">
+          {user.avatarUrl ? (
+            <img
+              alt="Profil rasmi"
+              className="size-full object-cover"
+              src={user.avatarUrl}
+            />
+          ) : (
+            user.fullName.slice(0, 1).toUpperCase()
+          )}
         </span>
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-xl font-bold tracking-tight">{user.fullName}</h2>
           <p className="text-xs text-muted-foreground">
             {user.phone ?? "Telefon raqam tasdiqlanmagan"}
           </p>
         </div>
+        <Button onClick={onEdit} size="sm" type="button" variant="outline">
+          Tahrirlash
+        </Button>
       </div>
       <p className="mb-2 text-xs text-muted-foreground">Sizning rollaringiz</p>
       <div className="grid gap-3">

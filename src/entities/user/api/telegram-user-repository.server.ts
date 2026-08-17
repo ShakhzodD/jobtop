@@ -7,21 +7,34 @@ import { getUserRoles } from "./user-role-repository.server";
 export async function upsertTelegramUser(
   user: VerifiedTelegramUser,
 ): Promise<CurrentUser> {
-  const { data, error } = await createSupabaseServerClient()
+  const supabase = createSupabaseServerClient();
+  const fields =
+    "id, telegram_id, full_name, telegram_username, avatar_url, phone, birth_date, district, experience_years, about, worker_categories, active_role";
+  const { data: existingUser, error: existingUserError } = await supabase
     .from("users")
-    .upsert(
-      {
-        telegram_id: user.telegramId,
-        full_name: user.fullName,
-        telegram_username: user.username,
-        avatar_url: user.photoUrl,
-      },
-      { onConflict: "telegram_id" },
-    )
-    .select(
-      "id, telegram_id, full_name, telegram_username, phone, birth_date, district, experience_years, about, worker_categories, active_role",
-    )
-    .single();
+    .select(fields)
+    .eq("telegram_id", user.telegramId)
+    .maybeSingle();
+
+  if (existingUserError) throw existingUserError;
+
+  const { data, error } = existingUser
+    ? await supabase
+        .from("users")
+        .update({ telegram_username: user.username })
+        .eq("id", existingUser.id)
+        .select(fields)
+        .single()
+    : await supabase
+        .from("users")
+        .insert({
+          telegram_id: user.telegramId,
+          full_name: user.fullName,
+          telegram_username: user.username,
+          avatar_url: user.photoUrl,
+        })
+        .select(fields)
+        .single();
 
   if (error) throw error;
   const roles = await getUserRoles(data.id);
@@ -30,6 +43,7 @@ export async function upsertTelegramUser(
     telegramId: data.telegram_id,
     fullName: data.full_name,
     telegramUsername: data.telegram_username,
+    avatarUrl: data.avatar_url,
     phone: data.phone,
     birthDate: data.birth_date,
     district: data.district,

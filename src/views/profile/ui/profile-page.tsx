@@ -8,7 +8,7 @@ import { updateCurrentUserRole } from "@/entities/user/api/get-current-user";
 import type { UserRole } from "@/entities/user/model/types";
 import { useUserStore } from "@/entities/user/model/user-store";
 import { RoleProfilePanel } from "@/features/profile/ui/role-profile-panel";
-import { WorkerProfileForm } from "@/features/profile/ui/worker-profile-form";
+import { ProfileEditSheet } from "@/features/profile/ui/profile-edit-sheet";
 import { WorkerProfileCompletionNotice } from "@/features/profile/ui/worker-profile-completion-notice";
 
 export function ProfilePage() {
@@ -16,6 +16,7 @@ export function ProfilePage() {
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);
   const [busy, setBusy] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   async function selectRole(role: UserRole, addRole = false) {
     setBusy(true);
@@ -48,11 +49,15 @@ export function ProfilePage() {
           <h1 className="text-2xl font-bold tracking-tight">Profil</h1>
         </div>
       </div>
-      <RoleProfilePanel busy={busy} onSelectRole={selectRole} user={user} />
+      <RoleProfilePanel
+        busy={busy}
+        onEdit={() => setIsEditing(true)}
+        onSelectRole={selectRole}
+        user={user}
+      />
       {user.activeRole === "worker" && (
         <>
           <WorkerProfileCompletionNotice user={user} />
-          <WorkerProfileForm user={user} />
         </>
       )}
       {user.activeRole === "employer" && (
@@ -72,6 +77,11 @@ export function ProfilePage() {
           <ShieldCheck /> Moderatsiya
         </Button>
       )}
+      <ProfileEditSheet
+        onOpenChange={setIsEditing}
+        open={isEditing}
+        user={user}
+      />
     </section>
   );
 }
