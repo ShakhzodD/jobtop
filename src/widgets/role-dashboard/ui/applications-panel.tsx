@@ -1,26 +1,40 @@
-import { ClipboardList, PlusCircle } from "lucide-react";
-import type { Job } from "@/entities/job/model/types";
+import { ClipboardList, MapPin } from "lucide-react";
 import type { UserRole } from "@/entities/user/model/types";
+import type { WorkerApplication } from "@/entities/application/model/worker-application";
 import { Button } from "@/components/ui/button";
 import { EmployerApplicationsPanel } from "@/widgets/employer-applications/ui/employer-applications-panel";
 
 type Props = {
-  appliedJobIds: string[];
-  jobs: Job[];
+  applications: WorkerApplication[];
+  isLoading?: boolean;
+  error?: string;
   role: UserRole | undefined;
-  onAddEmployerRole: () => void;
-  onOpenJob: (job: Job) => void;
+  onOpenJob: (jobId: string) => void;
 };
 
+const statusCopy = {
+  pending: {
+    label: "Ko‘rib chiqilmoqda",
+    className: "bg-amber-100 text-amber-800",
+  },
+  selected: {
+    label: "Tanlandingiz",
+    className: "bg-emerald-100 text-emerald-800",
+  },
+  rejected: { label: "Rad etildi", className: "bg-red-100 text-red-800" },
+  withdrawn: {
+    label: "Bekor qilindi",
+    className: "bg-muted text-muted-foreground",
+  },
+} as const;
+
 export function ApplicationsPanel({
-  appliedJobIds,
-  jobs,
+  applications,
+  isLoading,
+  error,
   role,
-  onAddEmployerRole,
   onOpenJob,
 }: Props) {
-  const appliedJobs = jobs.filter((job) => appliedJobIds.includes(job.id));
-
   if (role === "employer") {
     return <EmployerApplicationsPanel />;
   }
@@ -36,6 +50,14 @@ export function ApplicationsPanel({
     );
   }
 
+  if (isLoading) {
+    return (
+      <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
+        Arizalar yuklanmoqda...
+      </section>
+    );
+  }
+
   return (
     <section>
       <div className="flex items-center justify-between py-2 pb-4">
@@ -46,29 +68,44 @@ export function ApplicationsPanel({
           <h2 className="text-xl font-semibold">Qiziqishlarim</h2>
         </div>
         <span className="grid size-7 place-items-center rounded-full bg-emerald-100 text-xs font-extrabold text-emerald-800">
-          {appliedJobs.length}
+          {applications.length}
         </span>
       </div>
-      {appliedJobs.length ? (
+      {error && (
+        <p className="mb-4 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </p>
+      )}
+      {applications.length ? (
         <div className="grid gap-2.5">
-          {appliedJobs.map((job) => (
-            <Button
-              className="h-auto justify-between rounded-2xl border border-border bg-card px-4 py-3 text-left"
-              key={job.id}
-              onClick={() => onOpenJob(job)}
-              variant="outline"
-            >
-              <span>
-                <b className="block">{job.title}</b>
-                <small className="text-muted-foreground">
-                  {job.district} · Ko‘rib chiqilmoqda
-                </small>
-              </span>
-              <span className="text-emerald-700">
-                {job.pay.toLocaleString("uz-UZ")} so‘m
-              </span>
-            </Button>
-          ))}
+          {applications.map((application) => {
+            const status = statusCopy[application.status];
+            const job = application.job;
+            if (!job) return null;
+            return (
+              <Button
+                className="h-auto justify-between rounded-2xl border border-border bg-card px-4 py-3 text-left"
+                key={application.id}
+                onClick={() => onOpenJob(job.id)}
+                variant="outline"
+              >
+                <span>
+                  <span
+                    className={`mb-2 inline-flex rounded-full px-2 py-1 text-[10px] font-bold ${status.className}`}
+                  >
+                    {status.label}
+                  </span>
+                  <b className="block text-sm">{job.title}</b>
+                  <small className="mt-1 flex items-center gap-1 text-muted-foreground">
+                    <MapPin className="size-3" /> {job.district}
+                  </small>
+                </span>
+                <span className="text-emerald-700">
+                  {job.payAmount.toLocaleString("uz-UZ")} so‘m
+                </span>
+              </Button>
+            );
+          })}
         </div>
       ) : (
         <div className="grid min-h-64 place-items-center gap-2 rounded-3xl border border-dashed border-emerald-200 bg-gradient-to-br from-white to-emerald-50 p-7 text-center text-emerald-800">
@@ -77,9 +114,6 @@ export function ApplicationsPanel({
           <p className="max-w-72 text-sm leading-6 text-muted-foreground">
             Topshiriqni ochib, “Qiziqish bildirish” tugmasini bosing.
           </p>
-          <Button onClick={onAddEmployerRole} variant="outline">
-            <PlusCircle /> Ish beruvchi bo‘lish
-          </Button>
         </div>
       )}
     </section>

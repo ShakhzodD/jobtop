@@ -1,6 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserFromRequest } from "@/entities/user/api/get-current-user.server";
 import { createSupabaseServerClient } from "@/shared/api/supabase/server";
+import type { ApplicationStatus } from "@/entities/application/model/types";
+import type { JobCategory } from "@/entities/job/model/types";
+
+type ApplicationRow = {
+  id: string;
+  status: ApplicationStatus;
+  note: string | null;
+  created_at: string;
+  jobs: {
+    id: string;
+    category: JobCategory;
+    title: string;
+    district: string;
+    pay_amount: number;
+  } | null;
+};
+
+export async function GET(request: NextRequest) {
+  try {
+    const user = await getCurrentUserFromRequest(request);
+    const { data, error } = await createSupabaseServerClient()
+      .from("applications")
+      .select(
+        "id, status, note, created_at, jobs!applications_job_id_fkey(id, category, title, district, pay_amount)",
+      )
+      .eq("worker_id", user.id)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+
+    const applications = ((data ?? []) as unknown as ApplicationRow[]).map(
+      (application) => ({
+        id: application.id,
+        status: application.status,
+        note: application.note,
+        createdAt: application.created_at,
+        job: application.jobs
+          ? {
+              id: application.jobs.id,
+              category: application.jobs.category,
+              title: application.jobs.title,
+              district: application.jobs.district,
+              payAmount: application.jobs.pay_amount,
+            }
+          : null,
+      }),
+    );
+    return NextResponse.json({ applications });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Arizalarni yuklab bo‘lmadi";
+    return NextResponse.json(
+      { error: message },
+      { status: message.includes("Telegram") ? 401 : 400 },
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "@bprogress/next/app";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BriefcaseBusiness } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { JobFeed } from "@/widgets/job-feed/ui/job-feed";
 
 export function HomePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const user = useUserStore((state) => state.user);
   const [category, setCategory] = useState<CategoryFilterValue>("Barchasi");
   const [activeJob, setActiveJob] = useState<Job | null>(null);
@@ -48,7 +49,12 @@ export function HomePage() {
 
   const applyMutation = useMutation({
     mutationFn: createApplication,
-    onSuccess: (_, jobId) => setApplications((current) => [...current, jobId]),
+    onSuccess: (_, jobId) => {
+      setApplications((current) => [...current, jobId]);
+      return queryClient.invalidateQueries({
+        queryKey: ["worker", "applications"],
+      });
+    },
   });
   const groupApplyMutation = useMutation({
     mutationFn: ({
@@ -58,8 +64,12 @@ export function HomePage() {
       jobId: string;
       usernames: string[];
     }) => createGroupApplication(jobId, usernames),
-    onSuccess: (_, { jobId }) =>
-      setApplications((current) => [...current, jobId]),
+    onSuccess: (_, { jobId }) => {
+      setApplications((current) => [...current, jobId]);
+      return queryClient.invalidateQueries({
+        queryKey: ["worker", "applications"],
+      });
+    },
   });
 
   const notificationJob = useMemo(() => {
