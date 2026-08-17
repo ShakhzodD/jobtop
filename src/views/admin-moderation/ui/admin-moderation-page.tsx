@@ -138,6 +138,23 @@ export function AdminModerationPage() {
                 <p className="text-sm leading-6 text-muted-foreground">
                   {job.description}
                 </p>
+                {job.sourceName && (
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    AI manbasi:{" "}
+                    {job.sourceUrl ? (
+                      <a
+                        className="font-semibold text-emerald-700 underline"
+                        href={job.sourceUrl}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {job.sourceName}
+                      </a>
+                    ) : (
+                      job.sourceName
+                    )}
+                  </p>
+                )}
                 <div className="my-4 grid gap-2 border-y border-border py-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-2">
                     <MapPin className="size-4 text-emerald-700" />

@@ -16,6 +16,35 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## AI e’lon importi
+
+Gemini faqat serverda ishga tushadi. Quyidagi server environment variable’larini
+Vercel va local `.env.local` ga kiriting:
+
+```bash
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-pro
+AI_IMPORT_SECRET=
+```
+
+Import qiluvchi cron yoki worker `POST /api/internal/ai-job-import` endpointiga
+`Authorization: Bearer <AI_IMPORT_SECRET>` bilan yuboradi. U faqat to‘liq
+ma’lumotli e’lonlarni moderatsiyaga jo‘natadi; dublikatlar saqlanmaydi. Tashqi
+e’lonlarda ishchi manba havolasiga o‘tadi, JobTop ichida ariza yubormaydi.
+
+```json
+{
+  "source": { "name": "Hamkor kanal", "url": "https://t.me/example" },
+  "listings": [
+    {
+      "externalId": "post-123",
+      "url": "https://t.me/example/123",
+      "text": "E’lonning asl matni"
+    }
+  ]
+}
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

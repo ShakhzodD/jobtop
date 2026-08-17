@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await createSupabaseServerClient()
       .from("jobs")
       .select(
-        "id, category, title, description, district, address, starts_at, ends_at, pay_amount, openings, created_at",
+        "id, category, title, description, district, address, starts_at, ends_at, pay_amount, openings, created_at, source_name, source_url",
       )
       .eq("status", "pending_moderation")
       .order("created_at", { ascending: true });
@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
       payAmount: job.pay_amount,
       openings: job.openings,
       createdAt: job.created_at,
+      sourceName: job.source_name ?? undefined,
+      sourceUrl: job.source_url ?? undefined,
     }));
 
     return NextResponse.json({ jobs });

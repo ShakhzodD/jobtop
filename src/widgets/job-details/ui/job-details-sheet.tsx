@@ -12,6 +12,7 @@ import { ApplyToJobButton } from "@/features/apply-to-job/ui/apply-to-job-button
 import { GroupApplicationForm } from "@/features/apply-to-job/ui/group-application-form";
 import { formatMoney } from "@/shared/lib/format-money";
 import { formatJobDateTime } from "@/shared/lib/format-job-schedule";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   job: Job;
@@ -39,6 +40,13 @@ export function JobDetailsSheet({
   onApplyGroup,
   onClose,
 }: Props) {
+  function openExternalJob() {
+    if (!job.externalUrl) return;
+    const telegram = window.Telegram?.WebApp;
+    if (telegram?.openLink) telegram.openLink(job.externalUrl);
+    else window.open(job.externalUrl, "_blank", "noopener,noreferrer");
+  }
+
   return (
     <Drawer
       onOpenChange={(open) => {
@@ -99,13 +107,23 @@ export function JobDetailsSheet({
               {error}
             </p>
           )}
-          <ApplyToJobButton
-            applied={applied}
-            applyLabel={text.apply}
-            appliedLabel={text.applied}
-            onApply={onApply}
-          />
-          {!applied && (
+          {job.externalUrl ? (
+            <Button
+              className="h-12 w-full bg-emerald-700 hover:bg-emerald-800"
+              onClick={openExternalJob}
+              type="button"
+            >
+              Manbaga o‘tish
+            </Button>
+          ) : (
+            <ApplyToJobButton
+              applied={applied}
+              applyLabel={text.apply}
+              appliedLabel={text.applied}
+              onApply={onApply}
+            />
+          )}
+          {!job.externalUrl && !applied && (
             <GroupApplicationForm disabled={applied} onSubmit={onApplyGroup} />
           )}
         </div>

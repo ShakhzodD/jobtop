@@ -17,6 +17,7 @@ export type Job = {
   endsAt: string;
   pay: number;
   openings: number;
+  externalUrl?: string;
   label?: string;
 };
 
@@ -32,6 +33,8 @@ export type ModerationJob = {
   payAmount: number;
   openings: number;
   createdAt: string;
+  sourceName?: string;
+  sourceUrl?: string;
 };
 
 export type EmployerJob = {

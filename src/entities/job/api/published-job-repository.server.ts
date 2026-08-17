@@ -11,6 +11,8 @@ type JobRow = {
   ends_at: string;
   pay_amount: number;
   openings: number;
+  source_name: string | null;
+  source_url: string | null;
   users: { full_name: string } | null;
 };
 
@@ -46,13 +48,14 @@ function toJob(job: JobRow): Job {
     id: job.id,
     category: job.category,
     title: job.title,
-    company: job.users?.full_name ?? "JobTop buyurtmachisi",
+    company: job.users?.full_name ?? job.source_name ?? "JobTop buyurtmachisi",
     district: job.district,
     schedule: formatJobSchedule(job.starts_at, job.ends_at),
     startsAt: job.starts_at,
     endsAt: job.ends_at,
     pay: job.pay_amount,
     openings: job.openings,
+    externalUrl: job.source_url ?? undefined,
   };
 }
 
@@ -65,7 +68,7 @@ export async function getPublishedJobsPage(
   let query = supabase
     .from("jobs")
     .select(
-      "id, category, title, district, starts_at, ends_at, pay_amount, openings, users!jobs_employer_id_fkey(full_name)",
+      "id, category, title, district, starts_at, ends_at, pay_amount, openings, source_name, source_url, users!jobs_employer_id_fkey(full_name)",
     )
     .eq("status", "published")
     .gte("ends_at", new Date().toISOString())

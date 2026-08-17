@@ -3,6 +3,7 @@ type TelegramWebApp = {
   ready?: () => void;
   expand?: () => void;
   requestFullscreen?: () => void;
+  openLink?: (url: string) => void;
   isFullscreen?: boolean;
   viewportHeight?: number;
   viewportStableHeight?: number;
