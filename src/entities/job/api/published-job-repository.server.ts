@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/shared/api/supabase/server";
+import { formatJobSchedule } from "@/shared/lib/format-job-schedule";
 import type { Job, JobCategory } from "../model/types";
 
 type JobRow = {
@@ -12,15 +13,6 @@ type JobRow = {
   openings: number;
   users: { full_name: string } | null;
 };
-
-function formatSchedule(start: string, end: string) {
-  const formatter = new Intl.DateTimeFormat("uz-UZ", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Asia/Tashkent",
-  });
-  return `Bugun · ${formatter.format(new Date(start))}–${formatter.format(new Date(end))}`;
-}
 
 export async function getPublishedJobs(): Promise<Job[]> {
   const supabase = createSupabaseServerClient();
@@ -41,7 +33,9 @@ export async function getPublishedJobs(): Promise<Job[]> {
     title: job.title,
     company: job.users?.full_name ?? "JobTop buyurtmachisi",
     district: job.district,
-    schedule: formatSchedule(job.starts_at, job.ends_at),
+    schedule: formatJobSchedule(job.starts_at, job.ends_at),
+    startsAt: job.starts_at,
+    endsAt: job.ends_at,
     pay: job.pay_amount,
     openings: job.openings,
   }));

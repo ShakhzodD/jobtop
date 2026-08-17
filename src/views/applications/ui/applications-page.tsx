@@ -7,24 +7,22 @@ import { getWorkerApplications } from "@/entities/application/api/get-worker-app
 import type { WorkerApplication } from "@/entities/application/model/worker-application";
 import type { Job } from "@/entities/job/model/types";
 import { messages, type Language } from "@/shared/config/locale";
+import { formatJobSchedule } from "@/shared/lib/format-job-schedule";
 import { ApplicationsPanel } from "@/widgets/role-dashboard/ui/applications-panel";
 import { JobDetailsSheet } from "@/widgets/job-details/ui/job-details-sheet";
 
 function toJob(application: WorkerApplication): Job | null {
   if (!application.job) return null;
   const { job } = application;
-  const formatter = new Intl.DateTimeFormat("uz-UZ", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Asia/Tashkent",
-  });
   return {
     id: job.id,
     category: job.category,
     title: job.title,
     company: job.company,
     district: job.district,
-    schedule: `Bugun · ${formatter.format(new Date(job.startsAt))}–${formatter.format(new Date(job.endsAt))}`,
+    schedule: formatJobSchedule(job.startsAt, job.endsAt),
+    startsAt: job.startsAt,
+    endsAt: job.endsAt,
     pay: job.payAmount,
     openings: job.openings,
   };

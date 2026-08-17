@@ -13,6 +13,8 @@ export type Job = {
   company: string;
   district: string;
   schedule: string;
+  startsAt: string;
+  endsAt: string;
   pay: number;
   openings: number;
   label?: string;

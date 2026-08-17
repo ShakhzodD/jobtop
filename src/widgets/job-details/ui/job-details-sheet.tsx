@@ -11,6 +11,7 @@ import {
 import { ApplyToJobButton } from "@/features/apply-to-job/ui/apply-to-job-button";
 import { GroupApplicationForm } from "@/features/apply-to-job/ui/group-application-form";
 import { formatMoney } from "@/shared/lib/format-money";
+import { formatJobDateTime } from "@/shared/lib/format-job-schedule";
 
 type Props = {
   job: Job;
@@ -69,12 +70,24 @@ export function JobDetailsSheet({
           <div className="my-5 flex items-start gap-3">
             <b className="text-lg text-emerald-700">◷</b>
             <div>
-              <strong>{job.schedule}</strong>
+              <strong>Boshlanish</strong>
               <small className="mt-1 block text-xs text-muted-foreground">
-                {job.openings} {text.staff}
+                {formatJobDateTime(job.startsAt)}
               </small>
             </div>
           </div>
+          <div className="my-5 flex items-start gap-3">
+            <b className="text-lg text-emerald-700">◷</b>
+            <div>
+              <strong>Tugash</strong>
+              <small className="mt-1 block text-xs text-muted-foreground">
+                {formatJobDateTime(job.endsAt)}
+              </small>
+            </div>
+          </div>
+          <p className="-mt-2 text-xs text-muted-foreground">
+            {job.openings} {text.staff}
+          </p>
           <div className="my-6 flex items-center justify-between rounded-2xl bg-emerald-50 p-4">
             <span className="text-xs text-emerald-800">{text.dayPay}</span>
             <strong className="text-lg text-emerald-800">
