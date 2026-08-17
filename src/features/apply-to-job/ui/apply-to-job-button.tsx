@@ -12,13 +12,14 @@ export function ApplyToJobButton({
   onApply,
 }: Props) {
   return (
-    <button
-      className="h-12 w-full rounded-2xl bg-emerald-700 text-sm font-bold text-white transition-colors hover:bg-emerald-800 disabled:bg-emerald-200"
+    <Button
+      className="h-12 w-full bg-emerald-700 hover:bg-emerald-800"
       type="button"
       disabled={applied}
       onClick={() => void onApply()}
     >
       {applied ? appliedLabel : applyLabel}
-    </button>
+    </Button>
   );
 }
+import { Button } from "@/components/ui/button";

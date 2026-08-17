@@ -1,6 +1,6 @@
 "use client";
 
-import { Save } from "lucide-react";
+import { BriefcaseBusiness, CalendarDays, MapPin, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -59,52 +59,78 @@ export function WorkerProfileForm({ user }: Props) {
 
   return (
     <form
-      className="mt-5 grid gap-3 rounded-3xl border border-border bg-card p-4"
+      className="mt-5 overflow-hidden rounded-3xl border border-border bg-card shadow-sm"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div>
-        <h2 className="font-semibold">Ishchi ma’lumotlari</h2>
-        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          Bu ma’lumotlar siz ariza yuborgan e’lonning ish beruvchisiga
-          ko‘rinadi.
-        </p>
+      <div className="border-b border-border bg-muted/30 p-4">
+        <div className="flex items-start gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-emerald-100 text-emerald-800">
+            <BriefcaseBusiness className="size-4" />
+          </span>
+          <div>
+            <h2 className="font-semibold">Ishchi ma’lumotlari</h2>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              Bu ma’lumotlar ariza yuborganingizda ish beruvchiga ko‘rinadi.
+            </p>
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <label className="grid gap-1.5 text-xs font-semibold">
-          Tug‘ilgan sana
-          <Input type="date" {...register("birthDate")} />
+      <div className="grid gap-5 p-4">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-2 text-sm font-medium">
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <CalendarDays className="size-3.5" /> Tug‘ilgan sana
+            </span>
+            <Input type="date" {...register("birthDate")} />
+          </label>
+          <label className="grid gap-2 text-sm font-medium">
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <BriefcaseBusiness className="size-3.5" /> Tajriba (yil)
+            </span>
+            <Input
+              inputMode="numeric"
+              max="60"
+              min="0"
+              placeholder="Masalan, 2"
+              type="number"
+              {...register("experienceYears")}
+            />
+          </label>
+        </div>
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <MapPin className="size-3.5" /> Tuman
+          </span>
+          <Input placeholder="Masalan, Chilonzor" {...register("district")} />
         </label>
-        <label className="grid gap-1.5 text-xs font-semibold">
-          Tajriba (yil)
-          <Input
-            inputMode="numeric"
-            max="60"
-            min="0"
-            type="number"
-            {...register("experienceYears")}
+        <label className="grid gap-2 text-sm font-medium">
+          <span className="text-muted-foreground">O‘zingiz haqingizda</span>
+          <Textarea
+            maxLength={500}
+            placeholder="Qaysi ishlarda tajribangiz borligini qisqa yozing"
+            rows={4}
+            {...register("about")}
           />
+          <span className="text-xs text-muted-foreground">
+            Tajriba va sizga mos ish turlarini yozing.
+          </span>
         </label>
+        {message && (
+          <p
+            className="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-800"
+            role="status"
+          >
+            {message}
+          </p>
+        )}
+        <Button
+          className="h-11 bg-emerald-700 hover:bg-emerald-800"
+          disabled={isSubmitting}
+          type="submit"
+        >
+          <Save /> {isSubmitting ? "Saqlanmoqda..." : "Ma’lumotlarni saqlash"}
+        </Button>
       </div>
-      <label className="grid gap-1.5 text-xs font-semibold">
-        Tuman
-        <Input placeholder="Masalan, Chilonzor" {...register("district")} />
-      </label>
-      <label className="grid gap-1.5 text-xs font-semibold">
-        O‘zingiz haqingizda
-        <Textarea
-          maxLength={500}
-          placeholder="Qaysi ishlarda tajribangiz borligini qisqa yozing"
-          {...register("about")}
-        />
-      </label>
-      {message && (
-        <p className="text-xs text-muted-foreground" role="status">
-          {message}
-        </p>
-      )}
-      <Button disabled={isSubmitting} type="submit">
-        <Save /> Saqlash
-      </Button>
     </form>
   );
 }

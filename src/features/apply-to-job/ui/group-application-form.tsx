@@ -2,6 +2,8 @@
 
 import { UsersRound } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Props = {
   disabled: boolean;
@@ -42,22 +44,23 @@ export function GroupApplicationForm({ disabled, onSubmit }: Props) {
         Sheriklarning Telegram username’larini vergul bilan yozing. Ular botdan
         taklifni tasdiqlaydi.
       </p>
-      <input
-        className="mt-3 h-10 w-full rounded-xl border border-border bg-card px-3 text-sm outline-none focus:border-emerald-500"
+      <Input
+        className="mt-3 h-10 bg-card"
         disabled={disabled || busy}
         onChange={(event) => setValue(event.target.value)}
         placeholder="@aziz, @sardor, @jasur"
         value={value}
       />
       {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
-      <button
-        className="mt-3 h-10 w-full rounded-xl border border-emerald-200 bg-card text-sm font-bold text-emerald-800 disabled:opacity-50"
+      <Button
+        className="mt-3 h-10 w-full border border-emerald-200 bg-card text-emerald-800 hover:bg-emerald-100"
         disabled={disabled || busy || !value.trim()}
         onClick={() => void submit()}
         type="button"
+        variant="outline"
       >
         {busy ? "Yuborilmoqda..." : "Guruh arizasini yuborish"}
-      </button>
+      </Button>
     </div>
   );
 }
