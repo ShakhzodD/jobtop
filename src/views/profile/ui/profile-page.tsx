@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { BriefcaseBusiness, ShieldCheck, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { updateCurrentUserRole } from "@/entities/user/api/get-current-user";
