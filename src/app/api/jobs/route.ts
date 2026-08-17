@@ -14,7 +14,7 @@ export async function GET() {
     console.error("Unable to load published jobs", error);
     const message = error instanceof Error ? error.message : "";
     const code =
-      message === "Missing NEXT_PUBLIC_SUPABASE_URL"
+      message === "Missing SUPABASE_URL"
         ? "MISSING_SUPABASE_URL"
         : message === "Missing SUPABASE_SECRET_KEY"
           ? "MISSING_SUPABASE_SECRET_KEY"
