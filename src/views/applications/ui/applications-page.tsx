@@ -20,7 +20,7 @@ export function ApplicationsPage() {
       .catch(() => undefined);
   }, []);
   return (
-    <section className="jt-route-page">
+    <section className="pt-2">
       <ApplicationsPanel
         appliedJobIds={[]}
         jobs={jobs}

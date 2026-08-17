@@ -53,16 +53,23 @@ export function HomePage() {
 
   return (
     <>
-      <header className="jt-topbar">
-        <div className="jt-brand">
-          <span>J</span>JobTop
+      <header className="flex min-h-10 items-center justify-between">
+        <div className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
+          <span className="grid size-8 place-items-center rounded-lg bg-emerald-700 text-lg text-white">
+            J
+          </span>
+          JobTop
         </div>
         <LanguageSwitch />
       </header>
-      <section className="jt-greeting">
-        <p>TOSHKENT · BUGUN</p>
-        <h1>{t("title")}</h1>
-        <span>{t("subtitle")}</span>
+      <section className="px-0.5 py-7">
+        <p className="mb-2 text-[10px] font-extrabold tracking-[0.15em] text-emerald-700">
+          TOSHKENT · BUGUN
+        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <span className="mt-2 block text-sm text-muted-foreground">
+          {t("subtitle")}
+        </span>
       </section>
       <CategoryFilter
         activeCategory={category}

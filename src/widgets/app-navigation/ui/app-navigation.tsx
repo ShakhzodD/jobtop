@@ -23,7 +23,10 @@ export function AppNavigation() {
   }, [router]);
 
   return (
-    <nav className="jt-nav" aria-label="Asosiy navigatsiya">
+    <nav
+      className="fixed right-0 bottom-0 left-0 z-40 mx-auto grid w-full max-w-[540px] grid-cols-3 border-t border-border bg-card px-3 pt-2 pb-[calc(0.625rem+env(safe-area-inset-bottom)+var(--tg-safe-area-inset-bottom,0px)+var(--tg-content-safe-area-inset-bottom,0px)+var(--jt-tg-safe-bottom,0px))]"
+      aria-label="Asosiy navigatsiya"
+    >
       {navigation.map(({ href, id, icon: Icon }) => (
         <Button
           className={cn(

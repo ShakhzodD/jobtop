@@ -14,7 +14,7 @@ export function LanguageSwitch() {
   return (
     <Button
       aria-label="Tilni o‘zgartirish"
-      className="jt-language h-8 rounded-xl"
+      className="h-8 rounded-xl text-xs"
       onClick={() => router.replace(pathname, { locale: nextLocale })}
       size="sm"
       variant="outline"

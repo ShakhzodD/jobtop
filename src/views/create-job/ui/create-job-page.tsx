@@ -17,10 +17,14 @@ export function CreateJobPage() {
       .catch(() => setUser(null));
   }, []);
   if (user === undefined)
-    return <section className="jt-page-state">Tekshirilmoqda...</section>;
+    return (
+      <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
+        Tekshirilmoqda...
+      </section>
+    );
   if (user?.activeRole !== "employer")
     return (
-      <section className="jt-empty-panel">
+      <section className="grid min-h-64 place-items-center gap-3 rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 p-7 text-center">
         <ShieldCheck className="size-8" />
         <h2>Ish beruvchi roli kerak</h2>
         <p>Profilingizdan ish beruvchi rolini qo‘shing va faollashtiring.</p>
@@ -28,7 +32,7 @@ export function CreateJobPage() {
       </section>
     );
   return (
-    <section className="jt-route-page">
+    <section className="pt-2">
       <Button
         className="mb-4"
         onClick={() => router.back()}
@@ -37,10 +41,16 @@ export function CreateJobPage() {
       >
         <ArrowLeft /> Orqaga
       </Button>
-      <div className="jt-page-heading">
-        <p>ISH BERUVCHI</p>
-        <h1>Yangi e’lon yarating</h1>
-        <span>Ma’lumotlar admin tomonidan tekshiriladi.</span>
+      <div className="mb-5">
+        <p className="mb-2 text-[10px] font-black tracking-[0.14em] text-emerald-700">
+          ISH BERUVCHI
+        </p>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Yangi e’lon yarating
+        </h1>
+        <span className="mt-2 block text-sm text-muted-foreground">
+          Ma’lumotlar admin tomonidan tekshiriladi.
+        </span>
       </div>
       <CreateJobForm onCreated={() => router.replace("/profile")} />
     </section>

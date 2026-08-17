@@ -34,10 +34,14 @@ export function ProfilePage() {
   }
 
   if (busy && !user)
-    return <section className="jt-page-state">Profil yuklanmoqda...</section>;
+    return (
+      <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
+        Profil yuklanmoqda...
+      </section>
+    );
   if (!user)
     return (
-      <section className="jt-empty-panel">
+      <section className="grid min-h-64 place-items-center gap-3 rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 p-7 text-center">
         <UserRound className="size-8" />
         <h2>Profilingizni yakunlang</h2>
         <p>
@@ -48,11 +52,13 @@ export function ProfilePage() {
     );
 
   return (
-    <section className="jt-route-page">
-      <div className="jt-screen-heading">
+    <section className="pt-2">
+      <div className="mb-4">
         <div>
-          <p>ACCOUNT</p>
-          <h1>Profil</h1>
+          <p className="mb-1 text-[10px] font-black tracking-[0.14em] text-emerald-700">
+            ACCOUNT
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight">Profil</h1>
         </div>
       </div>
       <RoleProfilePanel busy={busy} onSelectRole={selectRole} user={user} />

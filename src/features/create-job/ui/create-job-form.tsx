@@ -66,9 +66,12 @@ export function CreateJobForm({ onCreated }: Props) {
   });
 
   return (
-    <form className="jt-route-form" onSubmit={submit}>
-      <section className="jt-form-section">
-        <label>
+    <form
+      className="rounded-3xl border border-border bg-card p-4 shadow-sm"
+      onSubmit={submit}
+    >
+      <section className="my-5 grid gap-3">
+        <label className="grid gap-2 text-sm font-bold text-foreground">
           Ish turi
           <Select
             onValueChange={(value) =>
@@ -88,15 +91,19 @@ export function CreateJobForm({ onCreated }: Props) {
             </SelectContent>
           </Select>
         </label>
-        <label>
+        <label className="grid gap-2 text-sm font-bold text-foreground">
           Ish nomi
           <Input
             {...register("title", { required: "Ish nomini kiriting" })}
             placeholder="Masalan, Omborga yuk tushirish"
           />
-          {errors.title && <small>{errors.title.message}</small>}
+          {errors.title && (
+            <small className="text-xs text-red-700">
+              {errors.title.message}
+            </small>
+          )}
         </label>
-        <label>
+        <label className="grid gap-2 text-sm font-bold text-foreground">
           Tavsif
           <Textarea
             {...register("description", { required: "Tavsifni kiriting" })}
@@ -105,16 +112,16 @@ export function CreateJobForm({ onCreated }: Props) {
           />
         </label>
       </section>
-      <section className="jt-form-section">
-        <div className="jt-form-grid">
-          <label>
+      <section className="my-5 grid gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-2 text-sm font-bold text-foreground">
             Tuman
             <Input
               {...register("district", { required: true })}
               placeholder="Chilonzor"
             />
           </label>
-          <label>
+          <label className="grid gap-2 text-sm font-bold text-foreground">
             Kerakli ishchi
             <Input
               {...register("openings", {
@@ -127,22 +134,22 @@ export function CreateJobForm({ onCreated }: Props) {
             />
           </label>
         </div>
-        <label>
+        <label className="grid gap-2 text-sm font-bold text-foreground">
           Aniq manzil
           <Input
             {...register("address", { required: true })}
             placeholder="Ko‘cha va bino raqami"
           />
         </label>
-        <div className="jt-form-grid">
-          <label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-2 text-sm font-bold text-foreground">
             Boshlanish
             <Input
               {...register("startsAt", { required: true })}
               type="datetime-local"
             />
           </label>
-          <label>
+          <label className="grid gap-2 text-sm font-bold text-foreground">
             Tugash
             <Input
               {...register("endsAt", { required: true })}
@@ -150,7 +157,7 @@ export function CreateJobForm({ onCreated }: Props) {
             />
           </label>
         </div>
-        <label>
+        <label className="grid gap-2 text-sm font-bold text-foreground">
           Bir kunlik haq (so‘m)
           <Input
             {...register("payAmount", {
@@ -164,7 +171,11 @@ export function CreateJobForm({ onCreated }: Props) {
           />
         </label>
       </section>
-      {error && <p className="jt-form-error">{error}</p>}
+      {error && (
+        <p className="mb-3 rounded-xl bg-red-50 p-3 text-xs text-red-700">
+          {error}
+        </p>
+      )}
       <Button
         className="h-12 w-full bg-emerald-700 hover:bg-emerald-800"
         disabled={isSubmitting}
@@ -172,7 +183,7 @@ export function CreateJobForm({ onCreated }: Props) {
       >
         {isSubmitting ? "Saqlanmoqda..." : "Moderatsiyaga yuborish"}
       </Button>
-      <p className="jt-submit-note">
+      <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
         Admin tasdiqlaganidan keyin e’lon ochiq lentada ko‘rinadi.
       </p>
     </form>
