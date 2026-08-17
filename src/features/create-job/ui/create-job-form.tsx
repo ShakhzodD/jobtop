@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createJob } from "../api/create-job";
+import { DateTimePicker } from "./date-time-picker";
 import type { JobCategory } from "@/entities/job/model/types";
 
 type FormValues = {
@@ -53,9 +54,17 @@ export function CreateJobForm({ onCreated }: Props) {
     defaultValues: { category: "Kuryer", openings: 1 },
   });
   const category = useWatch({ control, name: "category" });
+  const startsAt = useWatch({ control, name: "startsAt" });
+  const endsAt = useWatch({ control, name: "endsAt" });
 
-  const submit = handleSubmit(async (values) => {
+  const submit = handleSubmit(async values => {
     setError("");
+
+    if (new Date(values.endsAt) <= new Date(values.startsAt)) {
+      setError("Tugash vaqti boshlanish vaqtidan keyin bo‘lishi kerak");
+      return;
+    }
+
     try {
       await createJobMutation.mutateAsync({
         ...values,
@@ -67,7 +76,7 @@ export function CreateJobForm({ onCreated }: Props) {
       onCreated();
     } catch (caught) {
       setError(
-        caught instanceof Error ? caught.message : "E’lon yaratib bo‘lmadi",
+        caught instanceof Error ? caught.message : "E’lon yaratib bo‘lmadi"
       );
     }
   });
@@ -81,16 +90,14 @@ export function CreateJobForm({ onCreated }: Props) {
         <label className="grid gap-2 text-sm font-bold text-foreground">
           Ish turi
           <Select
-            onValueChange={(value) =>
-              setValue("category", value as JobCategory)
-            }
+            onValueChange={value => setValue("category", value as JobCategory)}
             value={category}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((item) => (
+              {categories.map(item => (
                 <SelectItem key={item} value={item}>
                   {item}
                 </SelectItem>
@@ -151,17 +158,51 @@ export function CreateJobForm({ onCreated }: Props) {
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-2 text-sm font-bold text-foreground">
             Boshlanish
-            <Input
-              {...register("startsAt", { required: true })}
-              type="datetime-local"
+            <input
+              {...register("startsAt", {
+                required: "Boshlanish vaqti tanlanishi kerak",
+              })}
+              type="hidden"
             />
+            <DateTimePicker
+              onChange={value =>
+                setValue("startsAt", value, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+              placeholder="Sana va vaqtni tanlang"
+              value={startsAt}
+            />
+            {errors.startsAt && (
+              <small className="text-xs text-red-700">
+                {errors.startsAt.message}
+              </small>
+            )}
           </label>
           <label className="grid gap-2 text-sm font-bold text-foreground">
             Tugash
-            <Input
-              {...register("endsAt", { required: true })}
-              type="datetime-local"
+            <input
+              {...register("endsAt", {
+                required: "Tugash vaqti tanlanishi kerak",
+              })}
+              type="hidden"
             />
+            <DateTimePicker
+              onChange={value =>
+                setValue("endsAt", value, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+              placeholder="Sana va vaqtni tanlang"
+              value={endsAt}
+            />
+            {errors.endsAt && (
+              <small className="text-xs text-red-700">
+                {errors.endsAt.message}
+              </small>
+            )}
           </label>
         </div>
         <label className="grid gap-2 text-sm font-bold text-foreground">
