@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserFromRequest } from "@/entities/user/api/get-current-user.server";
 import { createSupabaseServerClient } from "@/shared/api/supabase/server";
+import { sendTelegramBotMessage } from "@/shared/lib/telegram/bot-api";
 
 type ApplicationWithJob = {
   id: string;
   job_id: string;
   status: string;
-  jobs: { employer_id: string; openings: number } | null;
+  jobs: { employer_id: string; openings: number; title: string } | null;
+  worker: { telegram_id: number } | null;
 };
 
 export async function PATCH(
@@ -20,7 +22,7 @@ export async function PATCH(
     const { data: rawApplication, error: applicationError } = await supabase
       .from("applications")
       .select(
-        "id, job_id, status, jobs!applications_job_id_fkey(employer_id, openings)",
+        "id, job_id, status, jobs!applications_job_id_fkey(employer_id, openings, title), worker:users!applications_worker_id_fkey(telegram_id)",
       )
       .eq("id", applicationId)
       .maybeSingle();
@@ -57,6 +59,23 @@ export async function PATCH(
         .from("jobs")
         .update({ status: "filled" })
         .eq("id", application.job_id);
+
+    const notifications = [
+      sendTelegramBotMessage(
+        user.telegramId,
+        `“${application.jobs.title}” e’loni uchun ishchi tanlandi.`,
+      ),
+    ];
+    if (application.worker?.telegram_id) {
+      notifications.push(
+        sendTelegramBotMessage(
+          application.worker.telegram_id,
+          `Tabriklaymiz! Siz “${application.jobs.title}” e’loni uchun tanlandingiz. Ish beruvchi tez orada siz bilan bog‘lanadi.`,
+        ),
+      );
+    }
+    void Promise.all(notifications).catch(() => undefined);
+
     return NextResponse.json({ application: data });
   } catch (error) {
     const message =

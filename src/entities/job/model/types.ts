@@ -31,3 +31,16 @@ export type ModerationJob = {
   openings: number;
   createdAt: string;
 };
+
+export type EmployerJob = {
+  id: string;
+  title: string;
+  category: JobCategory;
+  district: string;
+  startsAt: string;
+  payAmount: number;
+  openings: number;
+  status: "pending_moderation" | "published" | "filled" | "cancelled";
+  applicationCount: number;
+  selectedCount: number;
+};

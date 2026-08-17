@@ -2,6 +2,7 @@ import { ClipboardList, PlusCircle } from "lucide-react";
 import type { Job } from "@/entities/job/model/types";
 import type { UserRole } from "@/entities/user/model/types";
 import { Button } from "@/components/ui/button";
+import { EmployerApplicationsPanel } from "@/widgets/employer-applications/ui/employer-applications-panel";
 
 type Props = {
   appliedJobIds: string[];
@@ -21,19 +22,7 @@ export function ApplicationsPanel({
   const appliedJobs = jobs.filter((job) => appliedJobIds.includes(job.id));
 
   if (role === "employer") {
-    return (
-      <section className="grid min-h-64 place-items-center gap-2 rounded-3xl border border-dashed border-emerald-200 bg-gradient-to-br from-white to-emerald-50 p-7 text-center text-emerald-800">
-        <ClipboardList className="size-8" />
-        <h2 className="text-xl font-semibold">E’lonlaringiz</h2>
-        <p className="max-w-72 text-sm leading-6 text-muted-foreground">
-          Yaratilgan e’lonlar avval moderatsiyadan o‘tadi. Tasdiqlangach
-          ishchilarning qiziqishlari shu yerda chiqadi.
-        </p>
-        <span className="text-xs text-muted-foreground">
-          Hozircha kutilayotgan ariza yo‘q.
-        </span>
-      </section>
-    );
+    return <EmployerApplicationsPanel />;
   }
 
   if (role !== "worker") {
