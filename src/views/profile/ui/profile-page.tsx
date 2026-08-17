@@ -14,7 +14,6 @@ import { WorkerProfileForm } from "@/features/profile/ui/worker-profile-form";
 export function ProfilePage() {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
-  const status = useUserStore((state) => state.status);
   const setUser = useUserStore((state) => state.setUser);
   const [busy, setBusy] = useState(false);
 
@@ -27,12 +26,6 @@ export function ProfilePage() {
     }
   }
 
-  if (status !== "ready")
-    return (
-      <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
-        Profil yuklanmoqda...
-      </section>
-    );
   if (!user)
     return (
       <section className="grid min-h-64 place-items-center gap-3 rounded-3xl border border-dashed border-emerald-200 bg-emerald-50/50 p-7 text-center">

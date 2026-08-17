@@ -8,8 +8,7 @@ export async function Providers({ children }: PropsWithChildren) {
   return (
     <ReactQueryProvider>
       <BProgressProvider>
-        <TelegramBootstrap />
-        {children}
+        <TelegramBootstrap>{children}</TelegramBootstrap>
       </BProgressProvider>
     </ReactQueryProvider>
   );
