@@ -43,7 +43,11 @@ function getAge(birthDate: string | null) {
   return age >= 0 ? age : null;
 }
 
-export function EmployerApplicationsPanel() {
+type Props = {
+  hideHeader?: boolean;
+};
+
+export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
   const [jobs, setJobs] = useState<EmployerJob[] | null>(null);
   const [selectedJob, setSelectedJob] = useState<EmployerJob | null>(null);
   const [applications, setApplications] = useState<
@@ -346,17 +350,19 @@ export function EmployerApplicationsPanel() {
 
   return (
     <section>
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <p className="mb-1 text-[10px] font-black tracking-[0.14em] text-emerald-700">
-            ISH BERUVCHI
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight">E’lonlarim</h1>
+      {!hideHeader && (
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <p className="mb-1 text-[10px] font-black tracking-[0.14em] text-emerald-700">
+              ISH BERUVCHI
+            </p>
+            <h1 className="text-2xl font-bold tracking-tight">E’lonlarim</h1>
+          </div>
+          <span className="grid size-8 place-items-center rounded-full bg-emerald-100 text-sm font-extrabold text-emerald-800">
+            {jobs.length}
+          </span>
         </div>
-        <span className="grid size-8 place-items-center rounded-full bg-emerald-100 text-sm font-extrabold text-emerald-800">
-          {jobs.length}
-        </span>
-      </div>
+      )}
       {error && (
         <p className="mb-3 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
           {error}
