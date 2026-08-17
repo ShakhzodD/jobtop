@@ -45,6 +45,20 @@ declare global {
   }
 }
 
+export async function waitForTelegramWebApp(timeout = 3_000) {
+  if (window.Telegram?.WebApp) return;
+
+  await new Promise<void>((resolve) => {
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      if (window.Telegram?.WebApp || Date.now() - startedAt >= timeout) {
+        window.clearInterval(timer);
+        resolve();
+      }
+    }, 50);
+  });
+}
+
 export function initializeTelegramWebApp() {
   const webApp = window.Telegram?.WebApp;
   const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(

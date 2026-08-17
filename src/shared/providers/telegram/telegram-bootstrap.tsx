@@ -3,21 +3,43 @@
 import { useEffect, useState, type PropsWithChildren } from "react";
 import { LoaderCircle } from "lucide-react";
 import Image from "next/image";
-import { initializeTelegramWebApp } from "@/shared/lib/telegram/initialize-web-app";
+import {
+  initializeTelegramWebApp,
+  waitForTelegramWebApp,
+} from "@/shared/lib/telegram/initialize-web-app";
 import { useUserStore } from "@/entities/user/model/user-store";
 
 export function TelegramBootstrap({ children }: PropsWithChildren) {
-  const [isBootstrapped, setIsBootstrapped] = useState(false);
+  const [isBootstrapped, setIsBootstrapped] = useState(
+    () => useUserStore.getState().status === "ready",
+  );
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const destroyTelegramWebApp = initializeTelegramWebApp();
+    let destroyTelegramWebApp: (() => void) | undefined;
+    let active = true;
 
-    void useUserStore
-      .getState()
-      .loadUser(true)
-      .finally(() => setIsBootstrapped(true));
+    void (async () => {
+      try {
+        await waitForTelegramWebApp();
+        destroyTelegramWebApp = initializeTelegramWebApp();
+        await useUserStore.getState().loadUser();
+        if (active) setIsBootstrapped(true);
+      } catch (caught) {
+        if (active) {
+          setError(
+            caught instanceof Error
+              ? caught.message
+              : "Profilni yuklab bo‘lmadi",
+          );
+        }
+      }
+    })();
 
-    return destroyTelegramWebApp;
+    return () => {
+      active = false;
+      destroyTelegramWebApp?.();
+    };
   }, []);
 
   if (!isBootstrapped)
@@ -32,8 +54,18 @@ export function TelegramBootstrap({ children }: PropsWithChildren) {
             className="size-12 rounded-2xl"
             priority
           />
-          <LoaderCircle className="size-5 animate-spin text-emerald-700" />
-          <p className="text-sm text-muted-foreground">JobTop yuklanmoqda...</p>
+          {error ? (
+            <p className="max-w-72 text-sm leading-6 text-destructive">
+              {error}
+            </p>
+          ) : (
+            <>
+              <LoaderCircle className="size-5 animate-spin text-emerald-700" />
+              <p className="text-sm text-muted-foreground">
+                JobTop yuklanmoqda...
+              </p>
+            </>
+          )}
         </div>
       </div>
     );

@@ -10,8 +10,12 @@ export type WorkerApplication = {
     id: string;
     category: JobCategory;
     title: string;
+    company: string;
     district: string;
     payAmount: number;
+    startsAt: string;
+    endsAt: string;
+    openings: number;
     status:
       | "draft"
       | "pending_moderation"

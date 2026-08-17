@@ -26,9 +26,9 @@ export const useUserStore = create<UserStore>()(
           const user = await getCurrentUser();
           set({ user, status: "ready" });
           return user;
-        } catch {
-          set({ user: null, status: "ready" });
-          return null;
+        } catch (error) {
+          set({ user: null, status: "idle" });
+          throw error;
         }
       },
       setUser: (user) => set({ user, status: "ready" }),

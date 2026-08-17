@@ -9,7 +9,7 @@ type Props = {
   isLoading?: boolean;
   error?: string;
   role: UserRole | undefined;
-  onOpenJob: (jobId: string) => void;
+  onOpenJob: (application: WorkerApplication) => void;
 };
 
 const statusCopy = {
@@ -108,7 +108,7 @@ export function ApplicationsPanel({
               <Button
                 className="h-auto justify-between rounded-2xl border border-border bg-card px-4 py-3 text-left"
                 key={application.id}
-                onClick={() => onOpenJob(job.id)}
+                onClick={() => onOpenJob(application)}
                 variant="outline"
               >
                 <span>

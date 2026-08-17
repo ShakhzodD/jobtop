@@ -13,8 +13,12 @@ type ApplicationRow = {
     id: string;
     category: JobCategory;
     title: string;
+    users: { full_name: string } | null;
     district: string;
     pay_amount: number;
+    starts_at: string;
+    ends_at: string;
+    openings: number;
     status:
       | "draft"
       | "pending_moderation"
@@ -32,7 +36,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await createSupabaseServerClient()
       .from("applications")
       .select(
-        "id, status, note, created_at, jobs!applications_job_id_fkey(id, category, title, district, pay_amount, status)",
+        "id, status, note, created_at, jobs!applications_job_id_fkey(id, category, title, district, pay_amount, starts_at, ends_at, openings, status, users!jobs_employer_id_fkey(full_name))",
       )
       .eq("worker_id", user.id)
       .order("created_at", { ascending: false });
@@ -49,8 +53,13 @@ export async function GET(request: NextRequest) {
               id: application.jobs.id,
               category: application.jobs.category,
               title: application.jobs.title,
+              company:
+                application.jobs.users?.full_name ?? "JobTop buyurtmachisi",
               district: application.jobs.district,
               payAmount: application.jobs.pay_amount,
+              startsAt: application.jobs.starts_at,
+              endsAt: application.jobs.ends_at,
+              openings: application.jobs.openings,
               status: application.jobs.status,
             }
           : null,
