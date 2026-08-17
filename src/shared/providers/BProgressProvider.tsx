@@ -8,7 +8,7 @@ export default function BProgressProvider({ children }: PropsWithChildren) {
     <ProgressProvider
       color="#087f51"
       height="3px"
-      options={{ showSpinner: false }}
+      options={{ parent: "#jobtop-page", showSpinner: false }}
       shallowRouting
       disableSameURL
     >
