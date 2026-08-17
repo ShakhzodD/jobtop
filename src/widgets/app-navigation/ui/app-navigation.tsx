@@ -1,6 +1,7 @@
 "use client";
 
 import { BriefcaseBusiness, ClipboardList, UserRound } from "lucide-react";
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,10 @@ export function AppNavigation() {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("Navigation");
+
+  useEffect(() => {
+    navigation.forEach(({ href }) => router.prefetch(href));
+  }, [router]);
 
   return (
     <nav className="jt-nav" aria-label="Asosiy navigatsiya">

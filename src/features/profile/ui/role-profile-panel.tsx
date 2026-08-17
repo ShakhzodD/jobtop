@@ -28,10 +28,10 @@ export function RoleProfilePanel({ user, busy, onSelectRole }: Props) {
         {user.roles.map(role => {
           const item = roleCopy[role];
           const selected = role === user.activeRole;
-          return <Button className={`jt-role-card ${selected ? "active" : ""}`} disabled={busy} key={role} onClick={() => onSelectRole(role)} type="button" variant="outline"><span>{item.emoji}</span><div><b>{item.title}</b><small>{item.description}</small></div>{selected && <i>Faol</i>}</Button>;
+          return <Button className={`jt-role-card h-auto min-h-24 p-4 ${selected ? "active" : ""}`} disabled={busy} key={role} onClick={() => onSelectRole(role)} type="button" variant="outline"><span>{item.emoji}</span><div><b>{item.title}</b><small>{item.description}</small></div>{selected && <i>Faol</i>}</Button>;
         })}
       </div>
-      {!user.roles.includes(otherRole) && <Button className="jt-add-role" disabled={busy} onClick={() => onSelectRole(otherRole, true)} type="button" variant="outline">＋ {roleCopy[otherRole].title} rolini qo‘shish</Button>}
+      {!user.roles.includes(otherRole) && <Button className="jt-add-role h-auto min-h-12" disabled={busy} onClick={() => onSelectRole(otherRole, true)} type="button" variant="outline">＋ {roleCopy[otherRole].title} rolini qo‘shish</Button>}
       <p className="jt-profile-note">Bitta telefon raqami bilan ishchi va ish beruvchi sifatida alohida ishlashingiz mumkin.</p>
     </section>
   );
