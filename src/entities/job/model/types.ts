@@ -17,3 +17,17 @@ export type Job = {
   openings: number;
   label?: string;
 };
+
+export type ModerationJob = {
+  id: string;
+  category: JobCategory;
+  title: string;
+  description: string;
+  district: string;
+  address: string;
+  startsAt: string;
+  endsAt: string;
+  payAmount: number;
+  openings: number;
+  createdAt: string;
+};
