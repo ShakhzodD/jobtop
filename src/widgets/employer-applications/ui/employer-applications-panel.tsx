@@ -19,6 +19,7 @@ import {
   type GroupApplication,
 } from "@/features/manage-applications/api/employer-jobs";
 import { selectWorker } from "@/features/select-worker/api/select-worker";
+import { completeJob } from "@/features/manage-applications/api/complete-job";
 
 const statusLabel: Record<EmployerJob["status"], string> = {
   pending_moderation: "Moderatsiyada",
@@ -149,6 +150,17 @@ export function EmployerApplicationsPanel() {
     }
   }
 
+  async function handleCompleteJob() {
+    if (!selectedJob) return;
+    try {
+      await completeJob(selectedJob.id);
+      setSelectedJob({ ...selectedJob, status: "filled" });
+      setError("Ish yakunlandi. Tanlangan ishchilarga tasdiqlash xabari yuborildi.");
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Ishni yakunlab bo‘lmadi");
+    }
+  }
+
   if (jobs === null) {
     return (
       <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
@@ -182,6 +194,7 @@ export function EmployerApplicationsPanel() {
           </p>
         </div>
         <h2 className="mb-3 text-lg font-semibold">Qiziqish bildirganlar</h2>
+        {selectedJob.status === "filled" && <Button className="mb-3 w-full" onClick={() => void handleCompleteJob()}><Check /> Ish bajarildi</Button>}
         {error && (
           <p className="mb-3 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
             {error}
