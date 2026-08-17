@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "@bprogress/next/app";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { BriefcaseBusiness } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -30,32 +31,40 @@ export function HomePage() {
   const language: Language = "uz";
   const text = messages[language];
   const t = useTranslations("Jobs");
-  const [allJobs, setAllJobs] = useState<Job[]>([]);
-  const [isJobsLoading, setIsJobsLoading] = useState(true);
   const isEmployer = user?.activeRole === "employer";
-  const visibleJobs = useMemo(
-    () =>
-      category === "Barchasi"
-        ? allJobs
-        : allJobs.filter((job) => job.category === category),
-    [allJobs, category],
-  );
+  const jobsQuery = useQuery({
+    queryKey: ["jobs", "published"],
+    queryFn: getJobsFromApi,
+    enabled: !isEmployer,
+  });
+  const visibleJobs = useMemo(() => {
+    const jobs = jobsQuery.data ?? [];
+    return category === "Barchasi"
+      ? jobs
+      : jobs.filter((job) => job.category === category);
+  }, [jobsQuery.data, category]);
 
-  useEffect(() => {
-    if (isEmployer) return;
-
-    getJobsFromApi()
-      .then(setAllJobs)
-      .catch(() => setAllJobs([]))
-      .finally(() => setIsJobsLoading(false));
-  }, [isEmployer]);
+  const applyMutation = useMutation({
+    mutationFn: createApplication,
+    onSuccess: (_, jobId) => setApplications((current) => [...current, jobId]),
+  });
+  const groupApplyMutation = useMutation({
+    mutationFn: ({
+      jobId,
+      usernames,
+    }: {
+      jobId: string;
+      usernames: string[];
+    }) => createGroupApplication(jobId, usernames),
+    onSuccess: (_, { jobId }) =>
+      setApplications((current) => [...current, jobId]),
+  });
 
   async function applyToJob() {
     if (!activeJob || applications.includes(activeJob.id)) return;
     setApplicationError("");
     try {
-      await createApplication(activeJob.id);
-      setApplications((current) => [...current, activeJob.id]);
+      await applyMutation.mutateAsync(activeJob.id);
     } catch (error) {
       setApplicationError(
         error instanceof Error ? error.message : "Ariza yuborib bo‘lmadi",
@@ -65,8 +74,7 @@ export function HomePage() {
 
   async function applyGroupToJob(usernames: string[]) {
     if (!activeJob) return;
-    await createGroupApplication(activeJob.id, usernames);
-    setApplications((current) => [...current, activeJob.id]);
+    await groupApplyMutation.mutateAsync({ jobId: activeJob.id, usernames });
   }
 
   return (
@@ -125,7 +133,7 @@ export function HomePage() {
             detailLabel={text.detail}
             emptyLabel={t("empty")}
             loadingLabel={t("loading")}
-            isLoading={!isEmployer && isJobsLoading}
+            isLoading={!isEmployer && jobsQuery.isLoading}
             onOpenJob={setActiveJob}
           />
           {activeJob && (

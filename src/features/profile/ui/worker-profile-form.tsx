@@ -2,6 +2,7 @@
 
 import { BriefcaseBusiness, CalendarDays, MapPin, Save } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,12 +23,11 @@ type FormValues = {
 export function WorkerProfileForm({ user }: Props) {
   const setUser = useUserStore((state) => state.setUser);
   const [message, setMessage] = useState("");
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { isSubmitting },
-  } = useForm<FormValues>({
+  const updateProfileMutation = useMutation({
+    mutationFn: updateWorkerProfile,
+    onSuccess: (updatedUser) => setUser(updatedUser),
+  });
+  const { register, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: {
       birthDate: user.birthDate ?? "",
       district: user.district ?? "",
@@ -48,7 +48,7 @@ export function WorkerProfileForm({ user }: Props) {
   async function onSubmit(values: FormValues) {
     setMessage("");
     try {
-      setUser(await updateWorkerProfile(values));
+      await updateProfileMutation.mutateAsync(values);
       setMessage("Profil saqlandi");
     } catch (error) {
       setMessage(
@@ -125,10 +125,13 @@ export function WorkerProfileForm({ user }: Props) {
         )}
         <Button
           className="h-11 bg-emerald-700 hover:bg-emerald-800"
-          disabled={isSubmitting}
+          disabled={updateProfileMutation.isPending}
           type="submit"
         >
-          <Save /> {isSubmitting ? "Saqlanmoqda..." : "Ma’lumotlarni saqlash"}
+          <Save />{" "}
+          {updateProfileMutation.isPending
+            ? "Saqlanmoqda..."
+            : "Ma’lumotlarni saqlash"}
         </Button>
       </div>
     </form>

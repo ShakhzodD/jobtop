@@ -9,7 +9,8 @@ import {
   Phone,
   UsersRound,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import type { EmployerApplication } from "@/entities/application/model/employer-application";
 import type { EmployerJob } from "@/entities/job/model/types";
@@ -49,125 +50,77 @@ type Props = {
 };
 
 export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
-  const [jobs, setJobs] = useState<EmployerJob[] | null>(null);
-  const [selectedJob, setSelectedJob] = useState<EmployerJob | null>(null);
-  const [applications, setApplications] = useState<
-    EmployerApplication[] | null
-  >(null);
-  const [groupApplications, setGroupApplications] = useState<
-    GroupApplication[]
-  >([]);
-  const [busyApplicationId, setBusyApplicationId] = useState<string>();
+  const queryClient = useQueryClient();
+  const [selectedJobId, setSelectedJobId] = useState<string>();
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    getEmployerJobs()
-      .then(setJobs)
-      .catch((requestError: unknown) =>
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : "E’lonlarni yuklab bo‘lmadi",
-        ),
-      );
-  }, []);
-
-  async function openJob(job: EmployerJob) {
-    setSelectedJob(job);
-    setApplications(null);
-    setError("");
-    try {
-      const response = await getJobApplications(job.id);
-      setApplications(response.applications);
-      setGroupApplications(response.groupApplications);
-    } catch (requestError) {
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : "Arizalarni yuklab bo‘lmadi",
-      );
-      setApplications([]);
-    }
-  }
+  const jobsQuery = useQuery({
+    queryKey: ["employer", "jobs"],
+    queryFn: getEmployerJobs,
+  });
+  const jobs = jobsQuery.data ?? [];
+  const selectedJob = jobs.find((job) => job.id === selectedJobId) ?? null;
+  const applicationsQuery = useQuery({
+    queryKey: ["employer", "jobs", selectedJobId, "applications"],
+    queryFn: () => getJobApplications(selectedJobId!),
+    enabled: Boolean(selectedJobId),
+  });
+  const refreshSelectedJob = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["employer", "jobs"] }),
+      queryClient.invalidateQueries({
+        queryKey: ["employer", "jobs", selectedJobId, "applications"],
+      }),
+    ]);
+  };
+  const selectWorkerMutation = useMutation({
+    mutationFn: selectWorker,
+    onSuccess: refreshSelectedJob,
+  });
+  const selectGroupMutation = useMutation({
+    mutationFn: selectGroupApplication,
+    onSuccess: refreshSelectedJob,
+  });
+  const completeJobMutation = useMutation({
+    mutationFn: completeJob,
+    onSuccess: refreshSelectedJob,
+  });
+  const applications = applicationsQuery.data?.applications ?? [];
+  const groupApplications = applicationsQuery.data?.groupApplications ?? [];
+  const requestError = [jobsQuery.error, applicationsQuery.error].find(
+    (queryError): queryError is Error => queryError instanceof Error,
+  )?.message;
 
   async function handleSelect(application: EmployerApplication) {
     if (!selectedJob || application.status === "selected") return;
-    setBusyApplicationId(application.id);
     setError("");
     try {
-      const selectedApplication = await selectWorker(application.id);
-      setApplications(
-        (current) =>
-          current?.map((item) =>
-            item.id === application.id
-              ? {
-                  ...item,
-                  status: "selected",
-                  worker: item.worker
-                    ? { ...item.worker, phone: selectedApplication.phone }
-                    : null,
-                }
-              : item,
-          ) ?? [],
-      );
-      setJobs(
-        (current) =>
-          current?.map((job) =>
-            job.id === selectedJob.id
-              ? { ...job, selectedCount: job.selectedCount + 1 }
-              : job,
-          ) ?? [],
-      );
-      setSelectedJob((current) =>
-        current
-          ? { ...current, selectedCount: current.selectedCount + 1 }
-          : null,
-      );
+      await selectWorkerMutation.mutateAsync(application.id);
     } catch (requestError) {
       setError(
         requestError instanceof Error
           ? requestError.message
           : "Nomzod tanlab bo‘lmadi",
       );
-    } finally {
-      setBusyApplicationId(undefined);
     }
   }
 
   async function handleSelectGroup(group: GroupApplication) {
     if (!selectedJob) return;
-    setBusyApplicationId(group.id);
     try {
-      await selectGroupApplication(group.id);
-      setGroupApplications((current) =>
-        current.map((item) =>
-          item.id === group.id ? { ...item, status: "selected" } : item,
-        ),
-      );
-      setSelectedJob((current) =>
-        current
-          ? {
-              ...current,
-              selectedCount: current.selectedCount + group.memberCount,
-            }
-          : null,
-      );
+      await selectGroupMutation.mutateAsync(group.id);
     } catch (requestError) {
       setError(
         requestError instanceof Error
           ? requestError.message
           : "Guruhni tanlab bo‘lmadi",
       );
-    } finally {
-      setBusyApplicationId(undefined);
     }
   }
 
   async function handleCompleteJob() {
     if (!selectedJob) return;
     try {
-      await completeJob(selectedJob.id);
-      setSelectedJob({ ...selectedJob, status: "filled" });
+      await completeJobMutation.mutateAsync(selectedJob.id);
       setError(
         "Ish yakunlandi. Tanlangan ishchilarga tasdiqlash xabari yuborildi.",
       );
@@ -180,7 +133,7 @@ export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
     }
   }
 
-  if (jobs === null) {
+  if (jobsQuery.isLoading) {
     return (
       <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
         E’lonlar yuklanmoqda...
@@ -196,7 +149,7 @@ export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
       <section>
         <Button
           className="mb-4"
-          onClick={() => setSelectedJob(null)}
+          onClick={() => setSelectedJobId(undefined)}
           size="sm"
           variant="ghost"
         >
@@ -216,17 +169,18 @@ export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
         {selectedJob.status === "filled" && (
           <Button
             className="mb-3 w-full"
+            disabled={completeJobMutation.isPending}
             onClick={() => void handleCompleteJob()}
           >
             <Check /> Ish bajarildi
           </Button>
         )}
-        {error && (
+        {(error || requestError) && (
           <p className="mb-3 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
-            {error}
+            {error || requestError}
           </p>
         )}
-        {applications === null ? (
+        {applicationsQuery.isLoading ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             Arizalar yuklanmoqda...
           </p>
@@ -279,7 +233,7 @@ export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
                 {group.status === "ready" && (
                   <Button
                     className="mt-3 w-full bg-emerald-700 hover:bg-emerald-800"
-                    disabled={!canSelect || busyApplicationId === group.id}
+                    disabled={!canSelect || selectGroupMutation.isPending}
                     onClick={() => handleSelectGroup(group)}
                   >
                     <UsersRound /> Guruhni tanlash
@@ -341,9 +295,7 @@ export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
                   {!isSelected && (
                     <Button
                       className="mt-4 w-full bg-emerald-700 hover:bg-emerald-800"
-                      disabled={
-                        !canSelect || busyApplicationId === application.id
-                      }
+                      disabled={!canSelect || selectWorkerMutation.isPending}
                       onClick={() => handleSelect(application)}
                     >
                       <Check /> Ishchini tanlash
@@ -380,9 +332,9 @@ export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
           </span>
         </div>
       )}
-      {error && (
+      {(error || requestError) && (
         <p className="mb-3 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
+          {error || requestError}
         </p>
       )}
       {jobs.length ? (
@@ -391,7 +343,10 @@ export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
             <Button
               className="h-auto justify-between rounded-2xl border border-border bg-card p-4 text-left hover:bg-muted/40"
               key={job.id}
-              onClick={() => openJob(job)}
+              onClick={() => {
+                setError("");
+                setSelectedJobId(job.id);
+              }}
               variant="outline"
             >
               <span>

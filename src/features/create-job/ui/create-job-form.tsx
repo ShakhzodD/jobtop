@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,13 +36,19 @@ const categories: JobCategory[] = [
 ];
 
 export function CreateJobForm({ onCreated }: Props) {
+  const queryClient = useQueryClient();
   const [error, setError] = useState("");
+  const createJobMutation = useMutation({
+    mutationFn: createJob,
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["employer", "jobs"] }),
+  });
   const {
     register,
     handleSubmit,
     setValue,
     control,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<FormValues>({
     defaultValues: { category: "Kuryer", openings: 1 },
   });
@@ -50,7 +57,7 @@ export function CreateJobForm({ onCreated }: Props) {
   const submit = handleSubmit(async (values) => {
     setError("");
     try {
-      await createJob({
+      await createJobMutation.mutateAsync({
         ...values,
         startsAt: new Date(values.startsAt).toISOString(),
         endsAt: new Date(values.endsAt).toISOString(),
@@ -178,10 +185,12 @@ export function CreateJobForm({ onCreated }: Props) {
       )}
       <Button
         className="h-12 w-full bg-emerald-700 hover:bg-emerald-800"
-        disabled={isSubmitting}
+        disabled={createJobMutation.isPending}
         type="submit"
       >
-        {isSubmitting ? "Saqlanmoqda..." : "Moderatsiyaga yuborish"}
+        {createJobMutation.isPending
+          ? "Saqlanmoqda..."
+          : "Moderatsiyaga yuborish"}
       </Button>
       <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
         Admin tasdiqlaganidan keyin e’lon ochiq lentada ko‘rinadi.

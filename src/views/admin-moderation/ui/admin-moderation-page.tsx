@@ -8,7 +8,8 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import type { ModerationJob } from "@/entities/job/model/types";
 import {
@@ -26,21 +27,28 @@ function formatDate(value: string) {
 }
 
 export function AdminModerationPage() {
-  const [jobs, setJobs] = useState<ModerationJob[] | null>(null);
-  const [busyJobId, setBusyJobId] = useState<string>();
+  const queryClient = useQueryClient();
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    getPendingJobs()
-      .then(setJobs)
-      .catch((requestError: unknown) =>
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : "E’lonlarni yuklab bo‘lmadi",
-        ),
-      );
-  }, []);
+  const pendingJobsQuery = useQuery({
+    queryKey: ["admin", "pending-jobs"],
+    queryFn: getPendingJobs,
+  });
+  const moderationMutation = useMutation({
+    mutationFn: ({
+      jobId,
+      action,
+    }: {
+      jobId: string;
+      action: "publish" | "reject";
+    }) => moderateJob(jobId, action),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["admin", "pending-jobs"] }),
+  });
+  const jobs = pendingJobsQuery.data ?? [];
+  const requestError =
+    pendingJobsQuery.error instanceof Error
+      ? pendingJobsQuery.error.message
+      : "E’lonlarni yuklab bo‘lmadi";
 
   async function handleModeration(
     job: ModerationJob,
@@ -53,23 +61,19 @@ export function AdminModerationPage() {
       return;
     }
 
-    setBusyJobId(job.id);
     setError("");
     try {
-      await moderateJob(job.id, action);
-      setJobs((current) => current?.filter(({ id }) => id !== job.id) ?? []);
+      await moderationMutation.mutateAsync({ jobId: job.id, action });
     } catch (requestError) {
       setError(
         requestError instanceof Error
           ? requestError.message
           : "Moderatsiya bajarilmadi",
       );
-    } finally {
-      setBusyJobId(undefined);
     }
   }
 
-  if (jobs === null) {
+  if (pendingJobsQuery.isLoading) {
     return (
       <section className="grid min-h-64 place-items-center text-sm text-muted-foreground">
         E’lonlar yuklanmoqda...
@@ -77,11 +81,13 @@ export function AdminModerationPage() {
     );
   }
 
-  if (error && !jobs.length) {
+  if ((error || pendingJobsQuery.error) && !jobs.length) {
     return (
       <section className="grid min-h-64 place-items-center gap-3 rounded-3xl border border-dashed border-destructive/30 bg-destructive/5 p-7 text-center">
         <CircleAlert className="size-8 text-destructive" />
-        <p className="max-w-72 text-sm text-muted-foreground">{error}</p>
+        <p className="max-w-72 text-sm text-muted-foreground">
+          {error || requestError}
+        </p>
       </section>
     );
   }
@@ -103,16 +109,16 @@ export function AdminModerationPage() {
         </span>
       </header>
 
-      {error && (
+      {(error || pendingJobsQuery.error) && (
         <p className="mb-4 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
+          {error || requestError}
         </p>
       )}
 
       {jobs.length ? (
         <div className="grid gap-3">
           {jobs.map((job) => {
-            const isBusy = busyJobId === job.id;
+            const isBusy = moderationMutation.isPending;
             return (
               <article
                 className="rounded-3xl border border-border bg-card p-4 shadow-sm"

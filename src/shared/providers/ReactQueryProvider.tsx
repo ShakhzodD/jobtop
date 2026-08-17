@@ -6,6 +6,7 @@ import { PropsWithChildren } from "react";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 30_000,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
