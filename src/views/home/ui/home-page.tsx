@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "@bprogress/next/app";
 import { BriefcaseBusiness } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { getJobsFromApi } from "@/entities/job/api/get-jobs";
 import type { Job } from "@/entities/job/model/types";
@@ -72,9 +73,14 @@ export function HomePage() {
     <>
       <header className="flex min-h-10 items-center">
         <div className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
-          <span className="grid size-8 place-items-center rounded-lg bg-emerald-700 text-lg text-white">
-            J
-          </span>
+          <Image
+            src="/jobtop-logo.png"
+            alt="JobTop"
+            width={32}
+            height={32}
+            className="size-8 rounded-lg"
+            priority
+          />
           JobTop
         </div>
       </header>
