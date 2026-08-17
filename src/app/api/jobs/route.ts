@@ -12,7 +12,13 @@ export async function GET() {
     return NextResponse.json({ jobs: await getPublishedJobs() });
   } catch (error) {
     console.error("Unable to load published jobs", error);
+    const message = error instanceof Error ? error.message : "";
     const code =
+      message === "Missing NEXT_PUBLIC_SUPABASE_URL"
+        ? "MISSING_SUPABASE_URL"
+        : message === "Missing SUPABASE_SECRET_KEY"
+          ? "MISSING_SUPABASE_SECRET_KEY"
+          :
       typeof error === "object" && error !== null && "code" in error
         ? String(error.code)
         : error instanceof Error
