@@ -1,0 +1,38 @@
+export type Language = "uz" | "ru";
+
+export const messages = {
+  uz: {
+    greeting: "Assalomu alaykum, Aziz",
+    headline: "Bugun sizga mos ishlar",
+    create: "E’lon berish",
+    newJobs: "Yangi e’lonlar",
+    detail: "Batafsil",
+    apply: "Ariza yuborish",
+    applied: "Ariza yuborildi",
+    address: "Aniq manzil tanlovdan keyin ochiladi",
+    staff: "ta ishchi kerak",
+    jobs: "Ishlar",
+    applications: "Arizalar",
+    profile: "Profil",
+    dayPay: "Bir kunlik haq",
+    close: "Yopish",
+    all: "Barchasi",
+  },
+  ru: {
+    greeting: "Здравствуйте, Азиз",
+    headline: "Работа для вас сегодня",
+    create: "Создать объявление",
+    newJobs: "Новые объявления",
+    detail: "Подробнее",
+    apply: "Откликнуться",
+    applied: "Отклик отправлен",
+    address: "Точный адрес откроется после выбора",
+    staff: "работника требуется",
+    jobs: "Работа",
+    applications: "Отклики",
+    profile: "Профиль",
+    dayPay: "Оплата за день",
+    close: "Закрыть",
+    all: "Все",
+  },
+} as const;
