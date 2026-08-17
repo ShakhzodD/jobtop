@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { BriefcaseBusiness, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
