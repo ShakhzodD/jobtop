@@ -8,4 +8,5 @@ export type CurrentUser = {
   phone: string | null;
   activeRole: UserRole;
   roles: UserRole[];
+  isAdmin?: boolean;
 };

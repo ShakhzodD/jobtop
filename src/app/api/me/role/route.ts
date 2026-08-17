@@ -5,6 +5,7 @@ import {
   setActiveUserRole,
 } from "@/entities/user/api/user-role-repository.server";
 import type { UserRole } from "@/entities/user/model/types";
+import { isTelegramAdmin } from "@/shared/lib/admin/is-telegram-admin";
 
 function parseRole(value: unknown): UserRole {
   if (value === "worker" || value === "employer") return value;
@@ -13,8 +14,9 @@ function parseRole(value: unknown): UserRole {
 
 export async function GET(request: NextRequest) {
   try {
+    const user = await getCurrentUserFromRequest(request);
     return NextResponse.json({
-      user: await getCurrentUserFromRequest(request),
+      user: { ...user, isAdmin: isTelegramAdmin(user.telegramId) },
     });
   } catch (error) {
     const message =

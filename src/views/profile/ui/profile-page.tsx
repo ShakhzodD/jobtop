@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "@bprogress/next/app";
-import { BriefcaseBusiness, UserRound } from "lucide-react";
+import { BriefcaseBusiness, ShieldCheck, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   getCurrentUser,
@@ -68,6 +68,15 @@ export function ProfilePage() {
           onClick={() => router.push("/jobs/new")}
         >
           <BriefcaseBusiness /> E’lon yaratish
+        </Button>
+      )}
+      {user.isAdmin && (
+        <Button
+          className="mt-3 h-11 w-full"
+          onClick={() => router.push("/admin/moderation")}
+          variant="outline"
+        >
+          <ShieldCheck /> Moderatsiya
         </Button>
       )}
     </section>
