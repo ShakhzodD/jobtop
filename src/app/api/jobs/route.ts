@@ -10,30 +10,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     return NextResponse.json({ jobs: await getPublishedJobs() });
-  } catch (error) {
-    console.error("Unable to load published jobs", error);
-    const message =
-      error instanceof Error
-        ? error.message
-        : typeof error === "object" && error !== null && "message" in error
-          ? String(error.message)
-          : "";
-    const code =
-      message === "Missing SUPABASE_URL"
-        ? "MISSING_SUPABASE_URL"
-        : message === "Missing SUPABASE_API_KEY"
-          ? "MISSING_SUPABASE_API_KEY"
-          :
-      typeof error === "object" && error !== null && "code" in error
-        ? String(error.code)
-        : message.toLowerCase().includes("fetch")
-          ? "SUPABASE_NETWORK_ERROR"
-          : message.toLowerCase().includes("api key") || message.toLowerCase().includes("unauthorized")
-            ? "SUPABASE_AUTH_ERROR"
-        : error instanceof Error
-          ? error.name
-          : "UNKNOWN";
-    return NextResponse.json({ error: "Jobs are temporarily unavailable", code }, { status: 503 });
+  } catch {
+    return NextResponse.json({ error: "Jobs are temporarily unavailable" }, { status: 503 });
   }
 }
 
