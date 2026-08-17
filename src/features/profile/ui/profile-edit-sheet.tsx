@@ -12,6 +12,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { jobCategories, type JobCategory } from "@/entities/job/model/types";
@@ -61,6 +62,7 @@ export function ProfileEditSheet({ open, onOpenChange, user }: Props) {
     });
   const selectedCategories = useWatch({ control, name: "categories" }) ?? [];
   const fullName = useWatch({ control, name: "fullName" }) ?? user.fullName;
+  const birthDate = useWatch({ control, name: "birthDate" });
 
   const updateProfileMutation = useMutation({
     mutationFn: async (values: FormValues) => {
@@ -146,7 +148,7 @@ export function ProfileEditSheet({ open, onOpenChange, user }: Props) {
 
   return (
     <Drawer onOpenChange={handleOpenChange} open={open} showSwipeHandle>
-      <DrawerContent className="max-h-[calc(100dvh-1rem)]">
+      <DrawerContent className="h-[78dvh] max-h-[78dvh]">
         <DrawerHeader className="border-b border-border text-left">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -250,7 +252,17 @@ export function ProfileEditSheet({ open, onOpenChange, user }: Props) {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="grid gap-2 text-sm font-medium">
                     Tug‘ilgan sana
-                    <Input type="date" {...register("birthDate")} />
+                    <input {...register("birthDate")} type="hidden" />
+                    <DatePicker
+                      disableFuture
+                      onChange={(value) =>
+                        setValue("birthDate", value, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
+                      value={birthDate}
+                    />
                   </label>
                   <label className="grid gap-2 text-sm font-medium">
                     Tajriba (yil)
