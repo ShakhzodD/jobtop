@@ -14,20 +14,35 @@ type JobRow = {
   users: { full_name: string } | null;
 };
 
-export async function getPublishedJobs(): Promise<Job[]> {
-  const supabase = createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("jobs")
-    .select(
-      "id, category, title, district, starts_at, ends_at, pay_amount, openings, users!jobs_employer_id_fkey(full_name)",
-    )
-    .eq("status", "published")
-    .gte("ends_at", new Date().toISOString())
-    .order("starts_at", { ascending: true });
+type JobsCursor = { startsAt: string; id: string };
 
-  if (error) throw error;
+export type PublishedJobsPage = {
+  jobs: Job[];
+  nextCursor: string | null;
+};
 
-  return ((data ?? []) as unknown as JobRow[]).map((job) => ({
+function decodeCursor(value: string | null): JobsCursor | null {
+  if (!value) return null;
+  try {
+    const cursor = JSON.parse(
+      Buffer.from(value, "base64url").toString("utf8"),
+    ) as JobsCursor;
+    return typeof cursor.startsAt === "string" && typeof cursor.id === "string"
+      ? cursor
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function encodeCursor(job: JobRow) {
+  return Buffer.from(
+    JSON.stringify({ startsAt: job.starts_at, id: job.id }),
+  ).toString("base64url");
+}
+
+function toJob(job: JobRow): Job {
+  return {
     id: job.id,
     category: job.category,
     title: job.title,
@@ -38,5 +53,41 @@ export async function getPublishedJobs(): Promise<Job[]> {
     endsAt: job.ends_at,
     pay: job.pay_amount,
     openings: job.openings,
-  }));
+  };
+}
+
+export async function getPublishedJobsPage(
+  cursorValue: string | null,
+  limit = 10,
+): Promise<PublishedJobsPage> {
+  const supabase = createSupabaseServerClient();
+  const cursor = decodeCursor(cursorValue);
+  let query = supabase
+    .from("jobs")
+    .select(
+      "id, category, title, district, starts_at, ends_at, pay_amount, openings, users!jobs_employer_id_fkey(full_name)",
+    )
+    .eq("status", "published")
+    .gte("ends_at", new Date().toISOString())
+    .order("starts_at", { ascending: true })
+    .order("id", { ascending: true })
+    .limit(limit + 1);
+
+  if (cursor) {
+    query = query.or(
+      `starts_at.gt.${cursor.startsAt},and(starts_at.eq.${cursor.startsAt},id.gt.${cursor.id})`,
+    );
+  }
+
+  const { data, error } = await query;
+
+  if (error) throw error;
+
+  const rows = (data ?? []) as unknown as JobRow[];
+  const pageRows = rows.slice(0, limit);
+  const lastJob = pageRows.at(-1);
+  return {
+    jobs: pageRows.map(toJob),
+    nextCursor: rows.length > limit && lastJob ? encodeCursor(lastJob) : null,
+  };
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPublishedJobs } from "@/entities/job/api/published-job-repository.server";
+import { getPublishedJobsPage } from "@/entities/job/api/published-job-repository.server";
 import { getCurrentUserFromRequest } from "@/entities/user/api/get-current-user.server";
 import { parseJobDraft } from "@/features/create-job/model/validate-job-draft";
 import { createSupabaseServerClient } from "@/shared/api/supabase/server";
@@ -47,9 +47,18 @@ async function notifyAdminsAboutNewJob(job: {
   );
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    return NextResponse.json({ jobs: await getPublishedJobs() });
+    const limit = Math.min(
+      Math.max(Number(request.nextUrl.searchParams.get("limit")) || 10, 1),
+      30,
+    );
+    return NextResponse.json(
+      await getPublishedJobsPage(
+        request.nextUrl.searchParams.get("cursor"),
+        limit,
+      ),
+    );
   } catch {
     return NextResponse.json(
       { error: "Jobs are temporarily unavailable" },

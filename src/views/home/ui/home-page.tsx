@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "@bprogress/next/app";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { BriefcaseBusiness } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { getJobsFromApi } from "@/entities/job/api/get-jobs";
+import { getJobsPage } from "@/entities/job/api/get-jobs";
 import type { Job } from "@/entities/job/model/types";
 import { useUserStore } from "@/entities/user/model/user-store";
 import { createApplication } from "@/features/apply-to-job/api/create-application";
@@ -35,17 +35,26 @@ export function HomePage() {
   const text = messages[language];
   const t = useTranslations("Jobs");
   const isEmployer = user?.activeRole === "employer";
-  const jobsQuery = useQuery({
+  const jobsQuery = useInfiniteQuery({
     queryKey: ["jobs", "published"],
-    queryFn: getJobsFromApi,
+    queryFn: ({ pageParam }) => getJobsPage(pageParam),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled: !isEmployer,
   });
+  const jobs = useMemo(
+    () => jobsQuery.data?.pages.flatMap((page) => page.jobs) ?? [],
+    [jobsQuery.data],
+  );
   const visibleJobs = useMemo(() => {
-    const jobs = jobsQuery.data ?? [];
     return category === "Barchasi"
       ? jobs
       : jobs.filter((job) => job.category === category);
-  }, [jobsQuery.data, category]);
+  }, [category, jobs]);
+  const loadMoreJobs = useCallback(() => {
+    if (!jobsQuery.hasNextPage || jobsQuery.isFetchingNextPage) return;
+    void jobsQuery.fetchNextPage();
+  }, [jobsQuery]);
 
   const applyMutation = useMutation({
     mutationFn: createApplication,
@@ -73,12 +82,12 @@ export function HomePage() {
   });
 
   const notificationJob = useMemo(() => {
-    if (isEmployer || typeof window === "undefined" || !jobsQuery.data)
+    if (isEmployer || typeof window === "undefined" || !jobs.length)
       return null;
     const jobId = new URLSearchParams(window.location.search).get("job");
     if (!jobId || jobId === dismissedNotificationJobId) return null;
-    return jobsQuery.data.find((job) => job.id === jobId) ?? null;
-  }, [dismissedNotificationJobId, isEmployer, jobsQuery.data]);
+    return jobs.find((job) => job.id === jobId) ?? null;
+  }, [dismissedNotificationJobId, isEmployer, jobs]);
   const openedJob = activeJob ?? notificationJob;
 
   function openJob(job: Job) {
@@ -164,8 +173,11 @@ export function HomePage() {
             title={text.newJobs}
             detailLabel={text.detail}
             emptyLabel={t("empty")}
-            loadingLabel={t("loading")}
+            hasMore={jobsQuery.hasNextPage}
             isLoading={!isEmployer && jobsQuery.isLoading}
+            isLoadingMore={jobsQuery.isFetchingNextPage}
+            loadingLabel={t("loading")}
+            onLoadMore={loadMoreJobs}
             onOpenJob={openJob}
           />
           {openedJob && (

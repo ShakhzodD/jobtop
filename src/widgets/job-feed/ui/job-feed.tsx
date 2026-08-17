@@ -1,6 +1,7 @@
 import type { Job } from "@/entities/job/model/types";
 import { JobCard } from "@/entities/job/ui/job-card";
 import { LoaderCircle } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 type Props = {
   jobs: Job[];
@@ -9,6 +10,9 @@ type Props = {
   emptyLabel: string;
   loadingLabel: string;
   isLoading?: boolean;
+  isLoadingMore?: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
   onOpenJob: (job: Job) => void;
 };
 
@@ -19,8 +23,27 @@ export function JobFeed({
   emptyLabel,
   loadingLabel,
   isLoading = false,
+  isLoadingMore = false,
+  hasMore = false,
+  onLoadMore,
   onOpenJob,
 }: Props) {
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const element = loadMoreRef.current;
+    if (!element || !hasMore || isLoadingMore || !onLoadMore) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) onLoadMore();
+      },
+      { rootMargin: "240px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, onLoadMore]);
+
   return (
     <section className="pt-7" aria-label={title}>
       <div className="flex items-center justify-between">
@@ -44,6 +67,19 @@ export function JobFeed({
               onOpen={onOpenJob}
             />
           ))}
+          {hasMore && (
+            <div
+              className="flex min-h-14 items-center justify-center gap-2 text-xs text-muted-foreground"
+              ref={loadMoreRef}
+            >
+              {isLoadingMore && (
+                <LoaderCircle className="size-4 animate-spin text-emerald-700" />
+              )}
+              <span>
+                {isLoadingMore ? "Yana e’lonlar yuklanmoqda..." : ""}
+              </span>
+            </div>
+          )}
         </div>
       ) : (
         <div className="mt-4 rounded-2xl border border-dashed border-border bg-muted/30 px-4 py-10 text-center text-sm text-muted-foreground">
