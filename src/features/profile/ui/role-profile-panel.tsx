@@ -1,6 +1,7 @@
 "use client";
 
 import type { CurrentUser, UserRole } from "@/entities/user/model/types";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   user: CurrentUser;
@@ -27,10 +28,10 @@ export function RoleProfilePanel({ user, busy, onSelectRole }: Props) {
         {user.roles.map(role => {
           const item = roleCopy[role];
           const selected = role === user.activeRole;
-          return <button className={`jt-role-card ${selected ? "active" : ""}`} disabled={busy} key={role} onClick={() => onSelectRole(role)} type="button"><span>{item.emoji}</span><div><b>{item.title}</b><small>{item.description}</small></div>{selected && <i>Faol</i>}</button>;
+          return <Button className={`jt-role-card ${selected ? "active" : ""}`} disabled={busy} key={role} onClick={() => onSelectRole(role)} type="button" variant="outline"><span>{item.emoji}</span><div><b>{item.title}</b><small>{item.description}</small></div>{selected && <i>Faol</i>}</Button>;
         })}
       </div>
-      {!user.roles.includes(otherRole) && <button className="jt-add-role" disabled={busy} onClick={() => onSelectRole(otherRole, true)} type="button">＋ {roleCopy[otherRole].title} rolini qo‘shish</button>}
+      {!user.roles.includes(otherRole) && <Button className="jt-add-role" disabled={busy} onClick={() => onSelectRole(otherRole, true)} type="button" variant="outline">＋ {roleCopy[otherRole].title} rolini qo‘shish</Button>}
       <p className="jt-profile-note">Bitta telefon raqami bilan ishchi va ish beruvchi sifatida alohida ishlashingiz mumkin.</p>
     </section>
   );

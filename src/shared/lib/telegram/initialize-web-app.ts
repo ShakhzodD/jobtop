@@ -4,6 +4,7 @@ type TelegramWebApp = {
   expand?: () => void;
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
+  disableVerticalSwipes?: () => void;
 };
 
 declare global {
@@ -16,6 +17,7 @@ export function initializeTelegramWebApp() {
   const webApp = window.Telegram?.WebApp;
   webApp?.ready?.();
   webApp?.expand?.();
+  webApp?.disableVerticalSwipes?.();
   webApp?.setHeaderColor?.("#f8faf8");
   webApp?.setBackgroundColor?.("#f8faf8");
 }

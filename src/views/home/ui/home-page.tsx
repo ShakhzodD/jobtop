@@ -18,6 +18,10 @@ import { messages, type Language } from "@/shared/config/locale";
 import { initializeTelegramWebApp } from "@/shared/lib/telegram/initialize-web-app";
 import { JobDetailsSheet } from "@/widgets/job-details/ui/job-details-sheet";
 import { JobFeed } from "@/widgets/job-feed/ui/job-feed";
+import { AppNavigation, type AppScreen } from "@/widgets/app-navigation/ui/app-navigation";
+import { ApplicationsPanel } from "@/widgets/role-dashboard/ui/applications-panel";
+import { Button } from "@/components/ui/button";
+import { Plus, UserRound } from "lucide-react";
 
 export function HomePage() {
   const [category, setCategory] = useState<CategoryFilterValue>("Barchasi");
@@ -28,7 +32,7 @@ export function HomePage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [profileBusy, setProfileBusy] = useState(false);
-  const [screen, setScreen] = useState<"jobs" | "profile">("jobs");
+  const [screen, setScreen] = useState<AppScreen>("jobs");
   const text = messages[language];
   const [allJobs, setAllJobs] = useState<Job[]>(getMockJobs);
   const visibleJobs = useMemo(
@@ -71,6 +75,11 @@ export function HomePage() {
 
   const isEmployer = user?.activeRole === "employer";
 
+  function navigate(nextScreen: AppScreen) {
+    setActiveJob(null);
+    setScreen(nextScreen);
+  }
+
   return (
     <main className="jobtop-app">
       <header className="jt-topbar">
@@ -84,27 +93,16 @@ export function HomePage() {
         <h1>{text.greeting}</h1>
         <span>{text.headline}</span>
       </section>
-      {user && <div className="jt-role-status"><span>{isEmployer ? "💼 Ish beruvchi" : "👷 Ishchi"}</span><button onClick={() => setScreen("profile")} type="button">Almashtirish</button></div>}
-      {screen === "profile" && user ? <RoleProfilePanel busy={profileBusy} onSelectRole={selectRole} user={user} /> : <>
-        {isEmployer && <button className="jt-create" type="button" onClick={() => setIsCreateOpen(true)}><b>＋</b>{text.create}</button>}
-        {!isEmployer && user && <button className="jt-worker-hint" onClick={() => setScreen("profile")} type="button">💼 E’lon berish uchun ish beruvchi rolini qo‘shing</button>}
+      {user && <div className="jt-role-status"><span>{isEmployer ? "💼 Ish beruvchi rejimi" : "👷 Ishchi rejimi"}</span><Button onClick={() => navigate("profile")} size="xs" variant="ghost">Almashtirish</Button></div>}
+      {screen === "profile" && (user ? <RoleProfilePanel busy={profileBusy} onSelectRole={selectRole} user={user} /> : <section className="jt-empty-panel"><UserRound className="size-8" /><h2>Profil topilmadi</h2><p>Botda /start ni bosing, rolni va telefon raqamingizni tanlang.</p></section>)}
+      {screen === "applications" && <ApplicationsPanel appliedJobIds={applications} jobs={allJobs} onAddEmployerRole={() => navigate("profile")} onOpenJob={setActiveJob} role={user?.activeRole} />}
+      {screen === "jobs" && <>
+        {isEmployer && <Button className="jt-create h-12 w-full rounded-2xl bg-emerald-700 text-base hover:bg-emerald-800" onClick={() => setIsCreateOpen(true)} size="lg"><Plus /> {text.create}</Button>}
+        {!isEmployer && user && <Button className="mb-2 h-auto w-full justify-start rounded-2xl border-emerald-100 py-3 text-left text-emerald-800" onClick={() => navigate("profile")} variant="outline">💼 E’lon berish uchun ish beruvchi rolini qo‘shing</Button>}
         <CategoryFilter activeCategory={category} allLabel={text.all} onChange={setCategory} />
-        <JobFeed jobs={visibleJobs} title={text.newJobs} detailLabel={text.detail} onOpenJob={setActiveJob} />
+        <JobFeed jobs={visibleJobs} title={isEmployer ? "Ishchilarga ko‘rinadigan e’lonlar" : text.newJobs} detailLabel={text.detail} onOpenJob={setActiveJob} />
       </>}
-      <nav className="jt-nav" aria-label="Asosiy navigatsiya">
-        <button className={screen === "jobs" ? "selected" : ""} onClick={() => setScreen("jobs")} type="button">
-          <strong>⌂</strong>
-          <span>{text.jobs}</span>
-        </button>
-        <button type="button">
-          <strong>▢</strong>
-          <span>{text.applications}</span>
-        </button>
-        <button className={screen === "profile" ? "selected" : ""} onClick={() => setScreen("profile")} type="button">
-          <strong>◉</strong>
-          <span>{text.profile}</span>
-        </button>
-      </nav>
+      <AppNavigation activeScreen={screen} onChange={navigate} />
       {activeJob && (
         <JobDetailsSheet
           job={activeJob}
