@@ -2,7 +2,7 @@
 
 import { BriefcaseBusiness, ClipboardList, UserRound } from "lucide-react";
 import { useEffect } from "react";
-import { useRouter } from "@bprogress/next/app";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";

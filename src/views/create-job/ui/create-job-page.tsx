@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "@bprogress/next/app";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/entities/user/model/user-store";
