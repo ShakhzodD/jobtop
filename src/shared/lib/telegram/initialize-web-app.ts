@@ -8,6 +8,7 @@ type TelegramWebApp = {
   viewportStableHeight?: number;
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
+  enableVerticalSwipes?: () => void;
   disableVerticalSwipes?: () => void;
   safeAreaInset?: {
     top: number;
@@ -87,7 +88,10 @@ export function initializeTelegramWebApp() {
 
   webApp?.ready?.();
   webApp?.expand?.();
-  webApp?.disableVerticalSwipes?.();
+  // Oddiy uzun sahifalarda Telegramning native scroll gesture'i faol turishi
+  // kerak. Vertical swipe'ni faqat o'zimizda pull-to-refresh kabi gesture
+  // bo'lganda o'chirish mumkin.
+  webApp?.enableVerticalSwipes?.();
   if (isMobileDevice) webApp?.requestFullscreen?.();
   syncViewport();
   webApp?.onEvent?.("contentSafeAreaChanged", syncViewport);

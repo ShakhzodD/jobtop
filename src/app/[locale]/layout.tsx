@@ -48,7 +48,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
-            <main className="mx-auto min-h-[var(--jt-tg-viewport-stable-height,100dvh)] w-full max-w-[540px] overscroll-y-contain bg-background px-4 pt-[max(3.25rem,calc(var(--jt-tg-safe-top,0px)+3.25rem))] pb-[calc(5.625rem+env(safe-area-inset-bottom)+var(--jt-tg-safe-bottom,0px))] text-foreground max-[380px]:px-3.5">
+            <main className="mx-auto min-h-[var(--jt-tg-viewport-stable-height,100dvh)] w-full max-w-[540px] touch-pan-y bg-background px-4 pt-[max(3.25rem,calc(var(--jt-tg-safe-top,0px)+3.25rem))] pb-[calc(5.625rem+env(safe-area-inset-bottom)+var(--jt-tg-safe-bottom,0px))] text-foreground max-[380px]:px-3.5">
               <div id="jobtop-page">{children}</div>
               <AppNavigation />
             </main>

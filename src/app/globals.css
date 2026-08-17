@@ -96,7 +96,10 @@ html,
 body {
   min-height: 100%;
   overflow-x: hidden;
-  overscroll-behavior-y: none;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 @media (max-width: 480px) {
