@@ -12,7 +12,12 @@ export async function GET() {
     return NextResponse.json({ jobs: await getPublishedJobs() });
   } catch (error) {
     console.error("Unable to load published jobs", error);
-    const message = error instanceof Error ? error.message : "";
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "object" && error !== null && "message" in error
+          ? String(error.message)
+          : "";
     const code =
       message === "Missing SUPABASE_URL"
         ? "MISSING_SUPABASE_URL"
@@ -21,6 +26,10 @@ export async function GET() {
           :
       typeof error === "object" && error !== null && "code" in error
         ? String(error.code)
+        : message.toLowerCase().includes("fetch")
+          ? "SUPABASE_NETWORK_ERROR"
+          : message.toLowerCase().includes("api key") || message.toLowerCase().includes("unauthorized")
+            ? "SUPABASE_AUTH_ERROR"
         : error instanceof Error
           ? error.name
           : "UNKNOWN";
