@@ -1,7 +1,15 @@
-import type { Language } from "@/shared/config/locale";
+"use client";
 
-type Props = { language: Language; onChange: (language: Language) => void };
+import { Languages } from "lucide-react";
+import { useLocale } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
-export function LanguageSwitch({ language, onChange }: Props) {
-  return <button className="jt-language" type="button" aria-label="Tilni o‘zgartirish" onClick={() => onChange(language === "uz" ? "ru" : "uz")}>{language.toUpperCase()}</button>;
+export function LanguageSwitch() {
+  const locale = useLocale();
+  const pathname = usePathname();
+  const router = useRouter();
+  const nextLocale = locale === "uz" ? "ru" : "uz";
+
+  return <Button aria-label="Tilni o‘zgartirish" className="jt-language h-8 rounded-xl" onClick={() => router.replace(pathname, { locale: nextLocale })} size="sm" variant="outline"><Languages /> {locale.toUpperCase()}</Button>;
 }

@@ -1,5 +1,5 @@
 {
   "Navigation": { "jobs": "Ishlar", "applications": "Arizalar", "profile": "Profil" },
-  "Jobs": { "title": "Bugungi e’lonlar", "empty": "Hozircha e’lonlar yo‘q" },
+  "Jobs": { "title": "Bugungi e’lonlar", "subtitle": "Bugun e’lon qilingan bir kunlik ishlar", "empty": "Hozircha e’lonlar yo‘q" },
   "Profile": { "title": "Profil", "signin": "Botda /start ni bosing va telefon raqamingizni yuboring." }
 }

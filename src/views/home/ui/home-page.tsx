@@ -10,6 +10,8 @@ import {
   type CategoryFilterValue,
 } from "@/features/job-filter/ui/category-filter";
 import { messages, type Language } from "@/shared/config/locale";
+import { LanguageSwitch } from "@/features/language-switch/ui/language-switch";
+import { useTranslations } from "next-intl";
 import { JobDetailsSheet } from "@/widgets/job-details/ui/job-details-sheet";
 import { JobFeed } from "@/widgets/job-feed/ui/job-feed";
 
@@ -20,6 +22,7 @@ export function HomePage() {
   const [applicationError, setApplicationError] = useState("");
   const language: Language = "uz";
   const text = messages[language];
+  const t = useTranslations("Jobs");
   const [allJobs, setAllJobs] = useState<Job[]>(getMockJobs);
   const visibleJobs = useMemo(
     () =>
@@ -54,11 +57,12 @@ export function HomePage() {
         <div className="jt-brand">
           <span>J</span>JobTop
         </div>
+        <LanguageSwitch />
       </header>
       <section className="jt-greeting">
         <p>TOSHKENT · BUGUN</p>
-        <h1>{text.newJobs}</h1>
-        <span>Bugun e’lon qilingan bir kunlik ishlar</span>
+        <h1>{t("title")}</h1>
+        <span>{t("subtitle")}</span>
       </section>
       <CategoryFilter activeCategory={category} allLabel={text.all} onChange={setCategory} />
       <JobFeed jobs={visibleJobs} title={text.newJobs} detailLabel={text.detail} onOpenJob={setActiveJob} />
