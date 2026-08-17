@@ -2,9 +2,19 @@ type TelegramWebApp = {
   initData?: string;
   ready?: () => void;
   expand?: () => void;
+  requestFullscreen?: () => void;
+  isFullscreen?: boolean;
+  viewportHeight?: number;
+  viewportStableHeight?: number;
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
   disableVerticalSwipes?: () => void;
+  safeAreaInset?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
   contentSafeAreaInset?: {
     top: number;
     bottom: number;
@@ -12,7 +22,19 @@ type TelegramWebApp = {
     right: number;
   };
   onEvent?: (
-    eventType: "contentSafeAreaChanged" | "viewportChanged",
+    eventType:
+      | "contentSafeAreaChanged"
+      | "safeAreaChanged"
+      | "viewportChanged"
+      | "fullscreenChanged",
+    eventHandler: () => void,
+  ) => void;
+  offEvent?: (
+    eventType:
+      | "contentSafeAreaChanged"
+      | "safeAreaChanged"
+      | "viewportChanged"
+      | "fullscreenChanged",
     eventHandler: () => void,
   ) => void;
 };
@@ -25,8 +47,9 @@ declare global {
 
 export function initializeTelegramWebApp() {
   const webApp = window.Telegram?.WebApp;
-  const syncInsets = () => {
-    const inset = webApp?.contentSafeAreaInset;
+  const syncViewport = () => {
+    const inset = webApp?.contentSafeAreaInset ?? webApp?.safeAreaInset;
+
     document.documentElement.style.setProperty(
       "--jt-tg-safe-top",
       `${inset?.top ?? 0}px`,
@@ -35,15 +58,34 @@ export function initializeTelegramWebApp() {
       "--jt-tg-safe-bottom",
       `${inset?.bottom ?? 0}px`,
     );
+    document.documentElement.style.setProperty(
+      "--jt-tg-viewport-height",
+      `${webApp?.viewportHeight ?? window.innerHeight}px`,
+    );
+    document.documentElement.style.setProperty(
+      "--jt-tg-viewport-stable-height",
+      `${webApp?.viewportStableHeight ?? window.innerHeight}px`,
+    );
   };
 
   webApp?.ready?.();
   webApp?.expand?.();
   webApp?.disableVerticalSwipes?.();
-  syncInsets();
-  webApp?.onEvent?.("contentSafeAreaChanged", syncInsets);
+  webApp?.requestFullscreen?.();
+  syncViewport();
+  webApp?.onEvent?.("contentSafeAreaChanged", syncViewport);
+  webApp?.onEvent?.("safeAreaChanged", syncViewport);
+  webApp?.onEvent?.("viewportChanged", syncViewport);
+  webApp?.onEvent?.("fullscreenChanged", syncViewport);
   webApp?.setHeaderColor?.("#f8faf8");
   webApp?.setBackgroundColor?.("#f8faf8");
+
+  return () => {
+    webApp?.offEvent?.("contentSafeAreaChanged", syncViewport);
+    webApp?.offEvent?.("safeAreaChanged", syncViewport);
+    webApp?.offEvent?.("viewportChanged", syncViewport);
+    webApp?.offEvent?.("fullscreenChanged", syncViewport);
+  };
 }
 
 export function getTelegramInitData(): string {

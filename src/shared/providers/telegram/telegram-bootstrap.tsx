@@ -6,8 +6,10 @@ import { useUserStore } from "@/entities/user/model/user-store";
 
 export function TelegramBootstrap() {
   useEffect(() => {
-    initializeTelegramWebApp();
+    const destroyTelegramWebApp = initializeTelegramWebApp();
     void useUserStore.getState().loadUser(true);
+
+    return destroyTelegramWebApp;
   }, []);
 
   return null;
