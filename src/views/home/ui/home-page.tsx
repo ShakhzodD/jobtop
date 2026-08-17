@@ -10,7 +10,6 @@ import {
   type CategoryFilterValue,
 } from "@/features/job-filter/ui/category-filter";
 import { messages, type Language } from "@/shared/config/locale";
-import { LanguageSwitch } from "@/features/language-switch/ui/language-switch";
 import { useTranslations } from "next-intl";
 import { JobDetailsSheet } from "@/widgets/job-details/ui/job-details-sheet";
 import { JobFeed } from "@/widgets/job-feed/ui/job-feed";
@@ -61,14 +60,13 @@ export function HomePage() {
 
   return (
     <>
-      <header className="flex min-h-10 items-center justify-between">
+      <header className="flex min-h-10 items-center">
         <div className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
           <span className="grid size-8 place-items-center rounded-lg bg-emerald-700 text-lg text-white">
             J
           </span>
           JobTop
         </div>
-        <LanguageSwitch />
       </header>
       <section className="px-0.5 py-7">
         <p className="mb-2 text-[10px] font-extrabold tracking-[0.15em] text-emerald-700">
