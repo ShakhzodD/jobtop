@@ -3,9 +3,49 @@ import { getPublishedJobs } from "@/entities/job/api/published-job-repository.se
 import { getCurrentUserFromRequest } from "@/entities/user/api/get-current-user.server";
 import { parseJobDraft } from "@/features/create-job/model/validate-job-draft";
 import { createSupabaseServerClient } from "@/shared/api/supabase/server";
+import { getTelegramAdminIds } from "@/shared/lib/admin/is-telegram-admin";
+import { sendTelegramBotMessage } from "@/shared/lib/telegram/bot-api";
 import type { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+async function notifyAdminsAboutNewJob(job: {
+  id: string;
+  category: string;
+  title: string;
+  district: string;
+  openings: number;
+  payAmount: number;
+  employerName: string;
+}) {
+  const adminIds = getTelegramAdminIds();
+  if (!adminIds.length) return;
+
+  const text = [
+    "🆕 Moderatsiya uchun yangi e’lon",
+    "",
+    `📌 ${job.title}`,
+    `🏷 ${job.category}`,
+    `👤 Ish beruvchi: ${job.employerName}`,
+    `📍 ${job.district}`,
+    `👥 Kerakli ishchi: ${job.openings}`,
+    `💰 ${job.payAmount.toLocaleString("uz-UZ")} so‘m`,
+  ].join("\n");
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        { text: "✅ Tasdiqlash", callback_data: `moderation:${job.id}:publish` },
+        { text: "✕ Rad etish", callback_data: `moderation:${job.id}:reject` },
+      ],
+    ],
+  };
+
+  await Promise.allSettled(
+    adminIds.map((telegramId) =>
+      sendTelegramBotMessage(telegramId, text, replyMarkup),
+    ),
+  );
+}
 
 export async function GET() {
   try {
@@ -44,6 +84,17 @@ export async function POST(request: NextRequest) {
       .select("id, status")
       .single();
     if (error) throw error;
+    await notifyAdminsAboutNewJob({
+      id: data.id,
+      category: draft.category,
+      title: draft.title,
+      district: draft.district,
+      openings: draft.openings,
+      payAmount: draft.payAmount,
+      employerName: user.fullName,
+    }).catch((notificationError) =>
+      console.error("Unable to notify admins about new job", notificationError),
+    );
     return NextResponse.json({ job: data }, { status: 201 });
   } catch (error) {
     const message =

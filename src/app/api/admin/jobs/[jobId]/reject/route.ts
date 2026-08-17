@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserFromRequest } from "@/entities/user/api/get-current-user.server";
-import { createSupabaseServerClient } from "@/shared/api/supabase/server";
+import { moderatePendingJob } from "@/features/moderate-job/api/moderate-pending-job.server";
 import { isTelegramAdmin } from "@/shared/lib/admin/is-telegram-admin";
 
 type Context = { params: Promise<{ jobId: string }> };
@@ -16,23 +16,9 @@ export async function PATCH(request: NextRequest, context: Context) {
     }
 
     const { jobId } = await context.params;
-    const { data, error } = await createSupabaseServerClient()
-      .from("jobs")
-      .update({ status: "cancelled" })
-      .eq("id", jobId)
-      .eq("status", "pending_moderation")
-      .select("id, status")
-      .maybeSingle();
-
-    if (error) throw error;
-    if (!data) {
-      return NextResponse.json(
-        { error: "Rad etiladigan e’lon topilmadi" },
-        { status: 404 },
-      );
-    }
-
-    return NextResponse.json({ job: data });
+    return NextResponse.json({
+      job: await moderatePendingJob(jobId, "reject"),
+    });
   } catch (error) {
     return NextResponse.json(
       {

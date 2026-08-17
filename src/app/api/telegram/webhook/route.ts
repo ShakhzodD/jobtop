@@ -5,6 +5,8 @@ import {
   isValidTelegramWebhookSecret,
   sendTelegramBotMessage,
 } from "@/shared/lib/telegram/bot-api";
+import { moderatePendingJob } from "@/features/moderate-job/api/moderate-pending-job.server";
+import { isTelegramAdmin } from "@/shared/lib/admin/is-telegram-admin";
 import {
   addUserRole,
   setActiveUserRole,
@@ -185,6 +187,40 @@ export async function POST(request: NextRequest) {
   try {
     const update = (await request.json()) as TelegramUpdate;
     const callback = update.callback_query;
+    if (callback?.data?.startsWith("moderation:")) {
+      const [, jobId, action] = callback.data.split(":");
+      if (
+        !jobId ||
+        (action !== "publish" && action !== "reject") ||
+        !isTelegramAdmin(callback.from.id)
+      ) {
+        await answerTelegramCallbackQuery(
+          callback.id,
+          "Bu amal faqat admin uchun",
+        );
+        return NextResponse.json({ ok: true });
+      }
+
+      try {
+        const job = await moderatePendingJob(jobId, action);
+        const result =
+          action === "publish"
+            ? `“${job.title}” tasdiqlandi va ishchilarga ko‘rsatildi.`
+            : `“${job.title}” rad etildi.`;
+        await answerTelegramCallbackQuery(callback.id, result);
+        if (callback.message) {
+          await sendTelegramBotMessage(callback.message.chat.id, result);
+        }
+      } catch (moderationError) {
+        await answerTelegramCallbackQuery(
+          callback.id,
+          moderationError instanceof Error
+            ? moderationError.message
+            : "Moderatsiya bajarilmadi",
+        );
+      }
+      return NextResponse.json({ ok: true });
+    }
     if (callback?.data?.startsWith("group:")) {
       const [, groupId, action] = callback.data.split(":");
       if (
