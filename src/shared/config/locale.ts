@@ -2,7 +2,7 @@ export type Language = "uz" | "ru";
 
 export const messages = {
   uz: {
-    greeting: "Assalomu alaykum, Aziz",
+    greeting: "Assalomu alaykum!",
     headline: "Bugun sizga mos ishlar",
     create: "E’lon berish",
     newJobs: "Yangi e’lonlar",
@@ -19,7 +19,7 @@ export const messages = {
     all: "Barchasi",
   },
   ru: {
-    greeting: "Здравствуйте, Азиз",
+    greeting: "Здравствуйте!",
     headline: "Работа для вас сегодня",
     create: "Создать объявление",
     newJobs: "Новые объявления",

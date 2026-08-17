@@ -74,6 +74,7 @@ export function HomePage() {
   }
 
   const isEmployer = user?.activeRole === "employer";
+  const greeting = user ? `Assalomu alaykum, ${user.fullName.split(" ")[0]}!` : text.greeting;
 
   function navigate(nextScreen: AppScreen) {
     setActiveJob(null);
@@ -90,7 +91,7 @@ export function HomePage() {
       </header>
       <section className="jt-greeting">
         <p>TOSHKENT · BUGUN</p>
-        <h1>{text.greeting}</h1>
+        <h1>{greeting}</h1>
         <span>{text.headline}</span>
       </section>
       {user && <div className="jt-role-status"><span>{isEmployer ? "💼 Ish beruvchi rejimi" : "👷 Ishchi rejimi"}</span><Button onClick={() => navigate("profile")} size="xs" variant="ghost">Almashtirish</Button></div>}
