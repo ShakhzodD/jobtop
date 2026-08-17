@@ -12,7 +12,13 @@ export async function GET() {
     return NextResponse.json({ jobs: await getPublishedJobs() });
   } catch (error) {
     console.error("Unable to load published jobs", error);
-    return NextResponse.json({ error: "Jobs are temporarily unavailable" }, { status: 503 });
+    const code =
+      typeof error === "object" && error !== null && "code" in error
+        ? String(error.code)
+        : error instanceof Error
+          ? error.name
+          : "UNKNOWN";
+    return NextResponse.json({ error: "Jobs are temporarily unavailable", code }, { status: 503 });
   }
 }
 
