@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/shared/providers";
+import { AppNavigation } from "@/widgets/app-navigation/ui/app-navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -46,7 +47,12 @@ export default async function LocaleLayout({ children, params }: Props) {
           strategy="beforeInteractive"
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers>{children}</Providers>
+          <Providers>
+            <main className="mx-auto min-h-[var(--tg-viewport-stable-height,100dvh)] w-full max-w-[540px] overscroll-y-contain bg-background px-4 pt-[max(112px,calc(var(--tg-safe-area-inset-top,0px)+var(--tg-content-safe-area-inset-top,0px)+var(--jt-tg-safe-top,0px)+20px))] pb-[calc(90px+env(safe-area-inset-bottom)+var(--tg-safe-area-inset-bottom,0px)+var(--tg-content-safe-area-inset-bottom,0px)+var(--jt-tg-safe-bottom,0px))] text-foreground max-[380px]:px-3.5">
+              {children}
+              <AppNavigation />
+            </main>
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>
