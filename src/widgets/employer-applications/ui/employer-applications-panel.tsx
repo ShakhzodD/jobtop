@@ -155,9 +155,15 @@ export function EmployerApplicationsPanel() {
     try {
       await completeJob(selectedJob.id);
       setSelectedJob({ ...selectedJob, status: "filled" });
-      setError("Ish yakunlandi. Tanlangan ishchilarga tasdiqlash xabari yuborildi.");
+      setError(
+        "Ish yakunlandi. Tanlangan ishchilarga tasdiqlash xabari yuborildi.",
+      );
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Ishni yakunlab bo‘lmadi");
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Ishni yakunlab bo‘lmadi",
+      );
     }
   }
 
@@ -194,7 +200,14 @@ export function EmployerApplicationsPanel() {
           </p>
         </div>
         <h2 className="mb-3 text-lg font-semibold">Qiziqish bildirganlar</h2>
-        {selectedJob.status === "filled" && <Button className="mb-3 w-full" onClick={() => void handleCompleteJob()}><Check /> Ish bajarildi</Button>}
+        {selectedJob.status === "filled" && (
+          <Button
+            className="mb-3 w-full"
+            onClick={() => void handleCompleteJob()}
+          >
+            <Check /> Ish bajarildi
+          </Button>
+        )}
         {error && (
           <p className="mb-3 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
             {error}
