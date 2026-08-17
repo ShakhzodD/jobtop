@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { updateCurrentUserRole } from "@/entities/user/api/get-current-user";
 import type { UserRole } from "@/entities/user/model/types";
 import { useUserStore } from "@/entities/user/model/user-store";
-import { LanguageSwitch } from "@/features/language-switch/ui/language-switch";
 import { RoleProfilePanel } from "@/features/profile/ui/role-profile-panel";
 import { WorkerProfileForm } from "@/features/profile/ui/worker-profile-form";
 
@@ -40,14 +39,13 @@ export function ProfilePage() {
 
   return (
     <section className="pt-2">
-      <div className="mb-4 flex items-start justify-between gap-3">
+      <div className="mb-4">
         <div>
           <p className="mb-1 text-[10px] font-black tracking-[0.14em] text-emerald-700">
             ACCOUNT
           </p>
           <h1 className="text-2xl font-bold tracking-tight">Profil</h1>
         </div>
-        <LanguageSwitch />
       </div>
       <RoleProfilePanel busy={busy} onSelectRole={selectRole} user={user} />
       {user.roles.includes("worker") && <WorkerProfileForm user={user} />}
