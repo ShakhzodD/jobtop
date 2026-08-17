@@ -21,8 +21,8 @@ export async function GET() {
     const code =
       message === "Missing SUPABASE_URL"
         ? "MISSING_SUPABASE_URL"
-        : message === "Missing SUPABASE_SECRET_KEY"
-          ? "MISSING_SUPABASE_SECRET_KEY"
+        : message === "Missing SUPABASE_API_KEY"
+          ? "MISSING_SUPABASE_API_KEY"
           :
       typeof error === "object" && error !== null && "code" in error
         ? String(error.code)
