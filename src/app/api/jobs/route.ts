@@ -10,7 +10,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     return NextResponse.json({ jobs: await getPublishedJobs() });
-  } catch {
+  } catch (error) {
+    console.error("Unable to load published jobs", error);
     return NextResponse.json({ error: "Jobs are temporarily unavailable" }, { status: 503 });
   }
 }
