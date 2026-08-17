@@ -47,6 +47,9 @@ declare global {
 
 export function initializeTelegramWebApp() {
   const webApp = window.Telegram?.WebApp;
+  const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(
+    navigator.userAgent,
+  );
   const syncViewport = () => {
     const inset = webApp?.contentSafeAreaInset ?? webApp?.safeAreaInset;
 
@@ -71,7 +74,7 @@ export function initializeTelegramWebApp() {
   webApp?.ready?.();
   webApp?.expand?.();
   webApp?.disableVerticalSwipes?.();
-  webApp?.requestFullscreen?.();
+  if (isMobileDevice) webApp?.requestFullscreen?.();
   syncViewport();
   webApp?.onEvent?.("contentSafeAreaChanged", syncViewport);
   webApp?.onEvent?.("safeAreaChanged", syncViewport);
