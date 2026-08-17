@@ -9,6 +9,7 @@ import type { UserRole } from "@/entities/user/model/types";
 import { useUserStore } from "@/entities/user/model/user-store";
 import { RoleProfilePanel } from "@/features/profile/ui/role-profile-panel";
 import { WorkerProfileForm } from "@/features/profile/ui/worker-profile-form";
+import { WorkerProfileCompletionNotice } from "@/features/profile/ui/worker-profile-completion-notice";
 
 export function ProfilePage() {
   const router = useRouter();
@@ -48,7 +49,12 @@ export function ProfilePage() {
         </div>
       </div>
       <RoleProfilePanel busy={busy} onSelectRole={selectRole} user={user} />
-      {user.roles.includes("worker") && <WorkerProfileForm user={user} />}
+      {user.activeRole === "worker" && (
+        <>
+          <WorkerProfileCompletionNotice user={user} />
+          <WorkerProfileForm user={user} />
+        </>
+      )}
       {user.activeRole === "employer" && (
         <Button
           className="mt-5 h-12 w-full bg-emerald-700 hover:bg-emerald-800"

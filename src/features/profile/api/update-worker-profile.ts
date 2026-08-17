@@ -1,4 +1,5 @@
 import type { CurrentUser } from "@/entities/user/model/types";
+import type { JobCategory } from "@/entities/job/model/types";
 import { getTelegramInitData } from "@/shared/lib/telegram/initialize-web-app";
 
 export type WorkerProfileDraft = {
@@ -6,6 +7,7 @@ export type WorkerProfileDraft = {
   district: string;
   experienceYears: string;
   about: string;
+  categories: JobCategory[];
 };
 
 export async function updateWorkerProfile(draft: WorkerProfileDraft) {

@@ -28,6 +28,8 @@ export function HomePage() {
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [applications, setApplications] = useState<string[]>([]);
   const [applicationError, setApplicationError] = useState("");
+  const [dismissedNotificationJobId, setDismissedNotificationJobId] =
+    useState<string>();
   const language: Language = "uz";
   const text = messages[language];
   const t = useTranslations("Jobs");
@@ -60,11 +62,31 @@ export function HomePage() {
       setApplications((current) => [...current, jobId]),
   });
 
+  const notificationJob = useMemo(() => {
+    if (isEmployer || typeof window === "undefined" || !jobsQuery.data)
+      return null;
+    const jobId = new URLSearchParams(window.location.search).get("job");
+    if (!jobId || jobId === dismissedNotificationJobId) return null;
+    return jobsQuery.data.find((job) => job.id === jobId) ?? null;
+  }, [dismissedNotificationJobId, isEmployer, jobsQuery.data]);
+  const openedJob = activeJob ?? notificationJob;
+
+  function openJob(job: Job) {
+    if (notificationJob) setDismissedNotificationJobId(notificationJob.id);
+    setActiveJob(job);
+  }
+
+  function closeJob() {
+    if (!activeJob && notificationJob)
+      setDismissedNotificationJobId(notificationJob.id);
+    setActiveJob(null);
+  }
+
   async function applyToJob() {
-    if (!activeJob || applications.includes(activeJob.id)) return;
+    if (!openedJob || applications.includes(openedJob.id)) return;
     setApplicationError("");
     try {
-      await applyMutation.mutateAsync(activeJob.id);
+      await applyMutation.mutateAsync(openedJob.id);
     } catch (error) {
       setApplicationError(
         error instanceof Error ? error.message : "Ariza yuborib bo‘lmadi",
@@ -73,8 +95,8 @@ export function HomePage() {
   }
 
   async function applyGroupToJob(usernames: string[]) {
-    if (!activeJob) return;
-    await groupApplyMutation.mutateAsync({ jobId: activeJob.id, usernames });
+    if (!openedJob) return;
+    await groupApplyMutation.mutateAsync({ jobId: openedJob.id, usernames });
   }
 
   return (
@@ -134,17 +156,17 @@ export function HomePage() {
             emptyLabel={t("empty")}
             loadingLabel={t("loading")}
             isLoading={!isEmployer && jobsQuery.isLoading}
-            onOpenJob={setActiveJob}
+            onOpenJob={openJob}
           />
-          {activeJob && (
+          {openedJob && (
             <JobDetailsSheet
-              job={activeJob}
+              job={openedJob}
               text={text}
-              applied={applications.includes(activeJob.id)}
+              applied={applications.includes(openedJob.id)}
               error={applicationError}
               onApply={applyToJob}
               onApplyGroup={applyGroupToJob}
-              onClose={() => setActiveJob(null)}
+              onClose={closeJob}
             />
           )}
         </>

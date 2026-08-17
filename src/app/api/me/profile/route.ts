@@ -2,16 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserFromRequest } from "@/entities/user/api/get-current-user.server";
 import { createSupabaseServerClient } from "@/shared/api/supabase/server";
 import { isTelegramAdmin } from "@/shared/lib/admin/is-telegram-admin";
+import { jobCategories, type JobCategory } from "@/entities/job/model/types";
 
 function optionalText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return null;
   return value.trim().slice(0, maxLength) || null;
 }
 
+function parseCategories(value: unknown): JobCategory[] {
+  if (!Array.isArray(value)) throw new Error("Ish kategoriyalarini tanlang");
+  const categories = [...new Set(value)];
+  if (
+    !categories.length ||
+    !categories.every((category) =>
+      jobCategories.includes(category as JobCategory),
+    )
+  ) {
+    throw new Error("Kamida bitta to‘g‘ri ish kategoriyasini tanlang");
+  }
+  return categories as JobCategory[];
+}
+
 export async function PATCH(request: NextRequest) {
   try {
     const user = await getCurrentUserFromRequest(request);
     const body = (await request.json()) as Record<string, unknown>;
+    const categories = parseCategories(body.categories);
     const birthDate = optionalText(body.birthDate, 10);
     const experienceYears =
       body.experienceYears === "" || body.experienceYears == null
@@ -37,6 +53,7 @@ export async function PATCH(request: NextRequest) {
         district: optionalText(body.district, 80),
         experience_years: experienceYears,
         about: optionalText(body.about, 500),
+        worker_categories: categories,
       })
       .eq("id", user.id);
     if (error) throw error;

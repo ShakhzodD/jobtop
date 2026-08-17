@@ -3,13 +3,14 @@
 import { BriefcaseBusiness, CalendarDays, MapPin, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { updateWorkerProfile } from "@/features/profile/api/update-worker-profile";
 import type { CurrentUser } from "@/entities/user/model/types";
 import { useUserStore } from "@/entities/user/model/user-store";
+import { jobCategories, type JobCategory } from "@/entities/job/model/types";
 
 type Props = { user: CurrentUser };
 
@@ -18,6 +19,7 @@ type FormValues = {
   district: string;
   experienceYears: string;
   about: string;
+  categories: JobCategory[];
 };
 
 export function WorkerProfileForm({ user }: Props) {
@@ -27,14 +29,17 @@ export function WorkerProfileForm({ user }: Props) {
     mutationFn: updateWorkerProfile,
     onSuccess: (updatedUser) => setUser(updatedUser),
   });
-  const { register, handleSubmit, reset } = useForm<FormValues>({
-    defaultValues: {
-      birthDate: user.birthDate ?? "",
-      district: user.district ?? "",
-      experienceYears: user.experienceYears?.toString() ?? "",
-      about: user.about ?? "",
-    },
-  });
+  const { register, handleSubmit, reset, control, setValue } =
+    useForm<FormValues>({
+      defaultValues: {
+        birthDate: user.birthDate ?? "",
+        district: user.district ?? "",
+        experienceYears: user.experienceYears?.toString() ?? "",
+        about: user.about ?? "",
+        categories: user.workerCategories,
+      },
+    });
+  const selectedCategories = useWatch({ control, name: "categories" }) ?? [];
 
   useEffect(() => {
     reset({
@@ -42,6 +47,7 @@ export function WorkerProfileForm({ user }: Props) {
       district: user.district ?? "",
       experienceYears: user.experienceYears?.toString() ?? "",
       about: user.about ?? "",
+      categories: user.workerCategories,
     });
   }, [reset, user]);
 
@@ -103,6 +109,38 @@ export function WorkerProfileForm({ user }: Props) {
           </span>
           <Input placeholder="Masalan, Chilonzor" {...register("district")} />
         </label>
+        <fieldset className="grid gap-2">
+          <legend className="text-sm font-medium text-muted-foreground">
+            Sizga mos ish turlari
+          </legend>
+          <p className="text-xs leading-5 text-muted-foreground">
+            Shu turlardagi yangi e’lonlar haqida Telegram orqali xabar olasiz.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {jobCategories.map((category) => {
+              const selected = selectedCategories.includes(category);
+              return (
+                <Button
+                  className="rounded-full"
+                  key={category}
+                  onClick={() =>
+                    setValue(
+                      "categories",
+                      selected
+                        ? selectedCategories.filter((item) => item !== category)
+                        : [...selectedCategories, category],
+                      { shouldDirty: true },
+                    )
+                  }
+                  type="button"
+                  variant={selected ? "default" : "outline"}
+                >
+                  {category}
+                </Button>
+              );
+            })}
+          </div>
+        </fieldset>
         <label className="grid gap-2 text-sm font-medium">
           <span className="text-muted-foreground">O‘zingiz haqingizda</span>
           <Textarea

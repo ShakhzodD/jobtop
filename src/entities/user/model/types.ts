@@ -10,7 +10,9 @@ export type CurrentUser = {
   district: string | null;
   experienceYears: number | null;
   about: string | null;
+  workerCategories: JobCategory[];
   activeRole: UserRole;
   roles: UserRole[];
   isAdmin?: boolean;
 };
+import type { JobCategory } from "@/entities/job/model/types";

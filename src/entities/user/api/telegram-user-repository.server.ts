@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/shared/api/supabase/server";
 import type { VerifiedTelegramUser } from "@/shared/lib/telegram/validate-init-data";
 import type { CurrentUser } from "../model/types";
+import type { JobCategory } from "@/entities/job/model/types";
 import { getUserRoles } from "./user-role-repository.server";
 
 export async function upsertTelegramUser(
@@ -18,7 +19,7 @@ export async function upsertTelegramUser(
       { onConflict: "telegram_id" },
     )
     .select(
-      "id, telegram_id, full_name, telegram_username, phone, birth_date, district, experience_years, about, active_role",
+      "id, telegram_id, full_name, telegram_username, phone, birth_date, district, experience_years, about, worker_categories, active_role",
     )
     .single();
 
@@ -34,6 +35,7 @@ export async function upsertTelegramUser(
     district: data.district,
     experienceYears: data.experience_years,
     about: data.about,
+    workerCategories: (data.worker_categories ?? []) as JobCategory[],
     activeRole: data.active_role,
     roles,
   };
