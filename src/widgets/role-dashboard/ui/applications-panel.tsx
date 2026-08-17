@@ -28,6 +28,28 @@ const statusCopy = {
   },
 } as const;
 
+function getStatus(application: WorkerApplication) {
+  if (application.job?.status === "completed") {
+    return {
+      label: "Ish yakunlandi",
+      className: "bg-sky-100 text-sky-800",
+    };
+  }
+  if (application.job?.status === "cancelled") {
+    return {
+      label: "E’lon bekor qilindi",
+      className: "bg-muted text-muted-foreground",
+    };
+  }
+  if (application.job?.status === "expired") {
+    return {
+      label: "E’lon muddati tugadi",
+      className: "bg-muted text-muted-foreground",
+    };
+  }
+  return statusCopy[application.status];
+}
+
 export function ApplicationsPanel({
   applications,
   isLoading,
@@ -79,7 +101,7 @@ export function ApplicationsPanel({
       {applications.length ? (
         <div className="grid gap-2.5">
           {applications.map((application) => {
-            const status = statusCopy[application.status];
+            const status = getStatus(application);
             const job = application.job;
             if (!job) return null;
             return (

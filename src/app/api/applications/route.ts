@@ -15,6 +15,14 @@ type ApplicationRow = {
     title: string;
     district: string;
     pay_amount: number;
+    status:
+      | "draft"
+      | "pending_moderation"
+      | "published"
+      | "filled"
+      | "completed"
+      | "cancelled"
+      | "expired";
   } | null;
 };
 
@@ -24,7 +32,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await createSupabaseServerClient()
       .from("applications")
       .select(
-        "id, status, note, created_at, jobs!applications_job_id_fkey(id, category, title, district, pay_amount)",
+        "id, status, note, created_at, jobs!applications_job_id_fkey(id, category, title, district, pay_amount, status)",
       )
       .eq("worker_id", user.id)
       .order("created_at", { ascending: false });
@@ -43,6 +51,7 @@ export async function GET(request: NextRequest) {
               title: application.jobs.title,
               district: application.jobs.district,
               payAmount: application.jobs.pay_amount,
+              status: application.jobs.status,
             }
           : null,
       }),

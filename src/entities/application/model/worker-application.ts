@@ -12,5 +12,13 @@ export type WorkerApplication = {
     title: string;
     district: string;
     payAmount: number;
+    status:
+      | "draft"
+      | "pending_moderation"
+      | "published"
+      | "filled"
+      | "completed"
+      | "cancelled"
+      | "expired";
   } | null;
 };
