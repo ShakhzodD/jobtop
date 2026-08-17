@@ -7,7 +7,8 @@
   "Jobs": {
     "title": "Bugungi e’lonlar",
     "subtitle": "Bugun e’lon qilingan bir kunlik ishlar",
-    "empty": "Hozircha e’lonlar yo‘q"
+    "empty": "Hozircha e’lonlar yo‘q",
+    "loading": "E’lonlar yuklanmoqda..."
   },
   "Profile": {
     "title": "Profil",

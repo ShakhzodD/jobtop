@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getJobsFromApi } from "@/entities/job/api/get-jobs";
-import { getMockJobs } from "@/entities/job/api/mock-job-repository";
 import type { Job } from "@/entities/job/model/types";
 import { createApplication } from "@/features/apply-to-job/api/create-application";
 import { createGroupApplication } from "@/features/apply-to-job/api/create-group-application";
@@ -24,7 +23,8 @@ export function HomePage() {
   const language: Language = "uz";
   const text = messages[language];
   const t = useTranslations("Jobs");
-  const [allJobs, setAllJobs] = useState<Job[]>(getMockJobs);
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
+  const [isJobsLoading, setIsJobsLoading] = useState(true);
   const visibleJobs = useMemo(
     () =>
       category === "Barchasi"
@@ -36,7 +36,8 @@ export function HomePage() {
   useEffect(() => {
     getJobsFromApi()
       .then(setAllJobs)
-      .catch(() => undefined);
+      .catch(() => setAllJobs([]))
+      .finally(() => setIsJobsLoading(false));
   }, []);
 
   async function applyToJob() {
@@ -87,6 +88,9 @@ export function HomePage() {
         jobs={visibleJobs}
         title={text.newJobs}
         detailLabel={text.detail}
+        emptyLabel={t("empty")}
+        loadingLabel={t("loading")}
+        isLoading={isJobsLoading}
         onOpenJob={setActiveJob}
       />
       {activeJob && (
