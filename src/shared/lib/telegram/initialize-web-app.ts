@@ -5,8 +5,16 @@ type TelegramWebApp = {
   setHeaderColor?: (color: string) => void;
   setBackgroundColor?: (color: string) => void;
   disableVerticalSwipes?: () => void;
-  contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
-  onEvent?: (eventType: "contentSafeAreaChanged" | "viewportChanged", eventHandler: () => void) => void;
+  contentSafeAreaInset?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  };
+  onEvent?: (
+    eventType: "contentSafeAreaChanged" | "viewportChanged",
+    eventHandler: () => void,
+  ) => void;
 };
 
 declare global {
@@ -19,8 +27,14 @@ export function initializeTelegramWebApp() {
   const webApp = window.Telegram?.WebApp;
   const syncInsets = () => {
     const inset = webApp?.contentSafeAreaInset;
-    document.documentElement.style.setProperty("--jt-tg-safe-top", `${inset?.top ?? 0}px`);
-    document.documentElement.style.setProperty("--jt-tg-safe-bottom", `${inset?.bottom ?? 0}px`);
+    document.documentElement.style.setProperty(
+      "--jt-tg-safe-top",
+      `${inset?.top ?? 0}px`,
+    );
+    document.documentElement.style.setProperty(
+      "--jt-tg-safe-bottom",
+      `${inset?.bottom ?? 0}px`,
+    );
   };
 
   webApp?.ready?.();

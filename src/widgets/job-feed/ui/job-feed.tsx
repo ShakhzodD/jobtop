@@ -16,7 +16,7 @@ export function JobFeed({ jobs, title, detailLabel, onOpenJob }: Props) {
         <span>{jobs.length}</span>
       </div>
       <div className="jt-list">
-        {jobs.map(job => (
+        {jobs.map((job) => (
           <JobCard
             key={job.id}
             job={job}

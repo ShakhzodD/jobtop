@@ -11,6 +11,23 @@ import { ApplicationsPanel } from "@/widgets/role-dashboard/ui/applications-pane
 export function ApplicationsPage() {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [jobs, setJobs] = useState<Job[]>(getMockJobs);
-  useEffect(() => { getCurrentUser().then(setUser).catch(() => setUser(null)); getJobsFromApi().then(setJobs).catch(() => undefined); }, []);
-  return <section className="jt-route-page"><ApplicationsPanel appliedJobIds={[]} jobs={jobs} onAddEmployerRole={() => undefined} onOpenJob={() => undefined} role={user?.activeRole} /></section>;
+  useEffect(() => {
+    getCurrentUser()
+      .then(setUser)
+      .catch(() => setUser(null));
+    getJobsFromApi()
+      .then(setJobs)
+      .catch(() => undefined);
+  }, []);
+  return (
+    <section className="jt-route-page">
+      <ApplicationsPanel
+        appliedJobIds={[]}
+        jobs={jobs}
+        onAddEmployerRole={() => undefined}
+        onOpenJob={() => undefined}
+        role={user?.activeRole}
+      />
+    </section>
+  );
 }

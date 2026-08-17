@@ -11,5 +11,15 @@ export function LanguageSwitch() {
   const router = useRouter();
   const nextLocale = locale === "uz" ? "ru" : "uz";
 
-  return <Button aria-label="Tilni o‘zgartirish" className="jt-language h-8 rounded-xl" onClick={() => router.replace(pathname, { locale: nextLocale })} size="sm" variant="outline"><Languages /> {locale.toUpperCase()}</Button>;
+  return (
+    <Button
+      aria-label="Tilni o‘zgartirish"
+      className="jt-language h-8 rounded-xl"
+      onClick={() => router.replace(pathname, { locale: nextLocale })}
+      size="sm"
+      variant="outline"
+    >
+      <Languages /> {locale.toUpperCase()}
+    </Button>
+  );
 }

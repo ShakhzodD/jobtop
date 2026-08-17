@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/shared/api/supabase/server";
-import { answerTelegramCallbackQuery, isValidTelegramWebhookSecret, sendTelegramBotMessage } from "@/shared/lib/telegram/bot-api";
-import { addUserRole, setActiveUserRole } from "@/entities/user/api/user-role-repository.server";
+import {
+  answerTelegramCallbackQuery,
+  isValidTelegramWebhookSecret,
+  sendTelegramBotMessage,
+} from "@/shared/lib/telegram/bot-api";
+import {
+  addUserRole,
+  setActiveUserRole,
+} from "@/entities/user/api/user-role-repository.server";
 
 type TelegramUser = {
   id: number;
@@ -17,14 +24,24 @@ type TelegramMessage = {
   contact?: { phone_number: string; user_id?: number };
 };
 
-type TelegramCallback = { id: string; data?: string; from: TelegramUser; message?: TelegramMessage };
-type TelegramUpdate = { message?: TelegramMessage; callback_query?: TelegramCallback };
+type TelegramCallback = {
+  id: string;
+  data?: string;
+  from: TelegramUser;
+  message?: TelegramMessage;
+};
+type TelegramUpdate = {
+  message?: TelegramMessage;
+  callback_query?: TelegramCallback;
+};
 
 const roleKeyboard = {
-  inline_keyboard: [[
-    { text: "👷 Ishchi", callback_data: "role:worker" },
-    { text: "💼 Ish beruvchi", callback_data: "role:employer" },
-  ]],
+  inline_keyboard: [
+    [
+      { text: "👷 Ishchi", callback_data: "role:worker" },
+      { text: "💼 Ish beruvchi", callback_data: "role:employer" },
+    ],
+  ],
 };
 
 const contactKeyboard = {
@@ -36,7 +53,10 @@ const contactKeyboard = {
 const removeKeyboard = { remove_keyboard: true };
 
 function fullName(user: TelegramUser) {
-  return [user.first_name, user.last_name].filter(Boolean).join(" ") || "JobTop foydalanuvchisi";
+  return (
+    [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+    "JobTop foydalanuvchisi"
+  );
 }
 
 async function registerContact(user: TelegramUser, phone: string) {
@@ -55,10 +75,20 @@ async function registerContact(user: TelegramUser, phone: string) {
   if (error) throw error;
 }
 
-async function saveInitialRole(user: TelegramUser, role: "worker" | "employer") {
+async function saveInitialRole(
+  user: TelegramUser,
+  role: "worker" | "employer",
+) {
   const { data, error } = await createSupabaseServerClient()
     .from("users")
-    .upsert({ telegram_id: user.id, full_name: fullName(user), telegram_username: user.username ?? null }, { onConflict: "telegram_id" })
+    .upsert(
+      {
+        telegram_id: user.id,
+        full_name: fullName(user),
+        telegram_username: user.username ?? null,
+      },
+      { onConflict: "telegram_id" },
+    )
     .select("id")
     .single();
   if (error) throw error;
@@ -67,7 +97,11 @@ async function saveInitialRole(user: TelegramUser, role: "worker" | "employer") 
 }
 
 export async function POST(request: NextRequest) {
-  if (!isValidTelegramWebhookSecret(request.headers.get("x-telegram-bot-api-secret-token"))) {
+  if (
+    !isValidTelegramWebhookSecret(
+      request.headers.get("x-telegram-bot-api-secret-token"),
+    )
+  ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -78,7 +112,11 @@ export async function POST(request: NextRequest) {
       const role = callback.data === "role:employer" ? "employer" : "worker";
       await saveInitialRole(callback.from, role);
       await answerTelegramCallbackQuery(callback.id);
-      await sendTelegramBotMessage(callback.message.chat.id, "Zo‘r! Endi ro‘yxatdan o‘tishni yakunlash uchun telefon raqamingizni yuboring.", contactKeyboard);
+      await sendTelegramBotMessage(
+        callback.message.chat.id,
+        "Zo‘r! Endi ro‘yxatdan o‘tishni yakunlash uchun telefon raqamingizni yuboring.",
+        contactKeyboard,
+      );
       return NextResponse.json({ ok: true });
     }
     const message = update.message;
@@ -97,7 +135,11 @@ export async function POST(request: NextRequest) {
 
     if (message.contact) {
       if (message.contact.user_id !== user.id) {
-        await sendTelegramBotMessage(message.chat.id, "Iltimos, pastdagi tugma orqali o‘z telefon raqamingizni yuboring.", contactKeyboard);
+        await sendTelegramBotMessage(
+          message.chat.id,
+          "Iltimos, pastdagi tugma orqali o‘z telefon raqamingizni yuboring.",
+          contactKeyboard,
+        );
         return NextResponse.json({ ok: true });
       }
 
@@ -110,10 +152,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    await sendTelegramBotMessage(message.chat.id, "Ro‘yxatdan o‘tish uchun /start bosing va telefon raqamingizni yuboring.", contactKeyboard);
+    await sendTelegramBotMessage(
+      message.chat.id,
+      "Ro‘yxatdan o‘tish uchun /start bosing va telefon raqamingizni yuboring.",
+      contactKeyboard,
+    );
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Telegram webhook handling failed", error);
-    return NextResponse.json({ error: "Unable to handle update" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to handle update" },
+      { status: 500 },
+    );
   }
 }

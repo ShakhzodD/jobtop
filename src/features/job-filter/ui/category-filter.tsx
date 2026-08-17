@@ -8,8 +8,27 @@ type Props = {
   onChange: (category: CategoryFilterValue) => void;
 };
 
-const categories: CategoryFilterValue[] = ["Barchasi", "Kuryer", "Xizmat", "Yuk tashish", "Tozalash"];
+const categories: CategoryFilterValue[] = [
+  "Barchasi",
+  "Kuryer",
+  "Xizmat",
+  "Yuk tashish",
+  "Tozalash",
+];
 
 export function CategoryFilter({ activeCategory, allLabel, onChange }: Props) {
-  return <div className="jt-categories">{categories.map((category) => <button key={category} type="button" onClick={() => onChange(category)} className={category === activeCategory ? "active" : ""}>{category === "Barchasi" ? allLabel : category}</button>)}</div>;
+  return (
+    <div className="jt-categories">
+      {categories.map((category) => (
+        <button
+          key={category}
+          type="button"
+          onClick={() => onChange(category)}
+          className={category === activeCategory ? "active" : ""}
+        >
+          {category === "Barchasi" ? allLabel : category}
+        </button>
+      ))}
+    </div>
+  );
 }

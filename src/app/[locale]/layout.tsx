@@ -24,7 +24,10 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-type Props = Readonly<{ children: React.ReactNode; params: Promise<{ locale: string }> }>;
+type Props = Readonly<{
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}>;
 
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;
@@ -38,7 +41,10 @@ export default async function LocaleLayout({ children, params }: Props) {
       className={cn("h-full antialiased", "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col">
-        <Script src="https://telegram.org/js/telegram-web-app.js?56" strategy="beforeInteractive" />
+        <Script
+          src="https://telegram.org/js/telegram-web-app.js?56"
+          strategy="beforeInteractive"
+        />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

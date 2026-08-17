@@ -1,4 +1,8 @@
-export type ApplicationStatus = "pending" | "selected" | "rejected" | "withdrawn";
+export type ApplicationStatus =
+  | "pending"
+  | "selected"
+  | "rejected"
+  | "withdrawn";
 
 export type JobApplication = {
   id: string;

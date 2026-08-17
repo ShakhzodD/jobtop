@@ -23,8 +23,10 @@ export function verifyTelegramInitData(initData: string): VerifiedTelegramUser {
   const suppliedHash = parameters.get("hash");
   const authDate = Number(parameters.get("auth_date"));
   const userJson = parameters.get("user");
-  if (!suppliedHash || !authDate || !userJson) throw new Error("Invalid Telegram session");
-  if (Math.floor(Date.now() / 1000) - authDate > 86_400) throw new Error("Telegram session expired");
+  if (!suppliedHash || !authDate || !userJson)
+    throw new Error("Invalid Telegram session");
+  if (Math.floor(Date.now() / 1000) - authDate > 86_400)
+    throw new Error("Telegram session expired");
 
   parameters.delete("hash");
   const dataCheckString = [...parameters.entries()]
@@ -32,14 +34,32 @@ export function verifyTelegramInitData(initData: string): VerifiedTelegramUser {
     .map(([key, value]) => `${key}=${value}`)
     .join("\n");
   const secret = createHmac("sha256", "WebAppData").update(botToken).digest();
-  const expectedHash = createHmac("sha256", secret).update(dataCheckString).digest("hex");
+  const expectedHash = createHmac("sha256", secret)
+    .update(dataCheckString)
+    .digest("hex");
   const providedHash = Buffer.from(suppliedHash, "hex");
   const calculatedHash = Buffer.from(expectedHash, "hex");
-  if (providedHash.length !== calculatedHash.length || !timingSafeEqual(providedHash, calculatedHash)) throw new Error("Invalid Telegram signature");
+  if (
+    providedHash.length !== calculatedHash.length ||
+    !timingSafeEqual(providedHash, calculatedHash)
+  )
+    throw new Error("Invalid Telegram signature");
 
   const telegramUser = JSON.parse(userJson) as TelegramWebAppUser;
-  if (!Number.isSafeInteger(telegramUser.id)) throw new Error("Invalid Telegram user");
-  const fullName = [telegramUser.first_name, telegramUser.last_name].filter(Boolean).join(" ").trim() || telegramUser.username || "JobTop foydalanuvchisi";
+  if (!Number.isSafeInteger(telegramUser.id))
+    throw new Error("Invalid Telegram user");
+  const fullName =
+    [telegramUser.first_name, telegramUser.last_name]
+      .filter(Boolean)
+      .join(" ")
+      .trim() ||
+    telegramUser.username ||
+    "JobTop foydalanuvchisi";
 
-  return { telegramId: telegramUser.id, fullName, username: telegramUser.username ?? null, photoUrl: telegramUser.photo_url ?? null };
+  return {
+    telegramId: telegramUser.id,
+    fullName,
+    username: telegramUser.username ?? null,
+    photoUrl: telegramUser.photo_url ?? null,
+  };
 }

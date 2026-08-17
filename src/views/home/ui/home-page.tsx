@@ -28,8 +28,8 @@ export function HomePage() {
     () =>
       category === "Barchasi"
         ? allJobs
-        : allJobs.filter(job => job.category === category),
-    [allJobs, category]
+        : allJobs.filter((job) => job.category === category),
+    [allJobs, category],
   );
 
   useEffect(() => {
@@ -43,10 +43,10 @@ export function HomePage() {
     setApplicationError("");
     try {
       await createApplication(activeJob.id);
-      setApplications(current => [...current, activeJob.id]);
+      setApplications((current) => [...current, activeJob.id]);
     } catch (error) {
       setApplicationError(
-        error instanceof Error ? error.message : "Ariza yuborib bo‘lmadi"
+        error instanceof Error ? error.message : "Ariza yuborib bo‘lmadi",
       );
     }
   }
@@ -64,8 +64,17 @@ export function HomePage() {
         <h1>{t("title")}</h1>
         <span>{t("subtitle")}</span>
       </section>
-      <CategoryFilter activeCategory={category} allLabel={text.all} onChange={setCategory} />
-      <JobFeed jobs={visibleJobs} title={text.newJobs} detailLabel={text.detail} onOpenJob={setActiveJob} />
+      <CategoryFilter
+        activeCategory={category}
+        allLabel={text.all}
+        onChange={setCategory}
+      />
+      <JobFeed
+        jobs={visibleJobs}
+        title={text.newJobs}
+        detailLabel={text.detail}
+        onOpenJob={setActiveJob}
+      />
       {activeJob && (
         <JobDetailsSheet
           job={activeJob}

@@ -14,7 +14,11 @@ type JobRow = {
 };
 
 function formatSchedule(start: string, end: string) {
-  const formatter = new Intl.DateTimeFormat("uz-UZ", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tashkent" });
+  const formatter = new Intl.DateTimeFormat("uz-UZ", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Tashkent",
+  });
   return `Bugun · ${formatter.format(new Date(start))}–${formatter.format(new Date(end))}`;
 }
 
@@ -22,7 +26,9 @@ export async function getPublishedJobs(): Promise<Job[]> {
   const supabase = createSupabaseServerClient();
   const { data, error } = await supabase
     .from("jobs")
-    .select("id, category, title, district, starts_at, ends_at, pay_amount, openings, users!jobs_employer_id_fkey(full_name)")
+    .select(
+      "id, category, title, district, starts_at, ends_at, pay_amount, openings, users!jobs_employer_id_fkey(full_name)",
+    )
     .eq("status", "published")
     .gte("ends_at", new Date().toISOString())
     .order("starts_at", { ascending: true });

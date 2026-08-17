@@ -26,7 +26,11 @@ export function AppNavigation() {
     <nav className="jt-nav" aria-label="Asosiy navigatsiya">
       {navigation.map(({ href, id, icon: Icon }) => (
         <Button
-          className={cn("h-auto flex-col gap-1 rounded-xl py-1 text-[11px]", (href === "/" ? pathname === "/" : pathname.startsWith(href)) && "bg-emerald-50 text-emerald-700 hover:bg-emerald-50")}
+          className={cn(
+            "h-auto flex-col gap-1 rounded-xl py-1 text-[11px]",
+            (href === "/" ? pathname === "/" : pathname.startsWith(href)) &&
+              "bg-emerald-50 text-emerald-700 hover:bg-emerald-50",
+          )}
           key={id}
           onClick={() => router.push(href)}
           size="sm"

@@ -1,4 +1,9 @@
-export const jobCategories = ["Kuryer", "Xizmat", "Yuk tashish", "Tozalash"] as const;
+export const jobCategories = [
+  "Kuryer",
+  "Xizmat",
+  "Yuk tashish",
+  "Tozalash",
+] as const;
 
 export type JobCategory = (typeof jobCategories)[number];
 export type Job = {
