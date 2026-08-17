@@ -52,6 +52,16 @@ const contactKeyboard = {
 
 const removeKeyboard = { remove_keyboard: true };
 
+const appUrl = (
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://jobtop-weld.vercel.app"
+).replace(/\/$/, "");
+
+const openAppKeyboard = {
+  inline_keyboard: [
+    [{ text: "🚀 Platformaga kirish", web_app: { url: `${appUrl}/uz` } }],
+  ],
+};
+
 function fullName(user: TelegramUser) {
   return (
     [user.first_name, user.last_name].filter(Boolean).join(" ") ||
@@ -73,6 +83,16 @@ async function registerContact(user: TelegramUser, phone: string) {
     );
 
   if (error) throw error;
+}
+
+async function isRegistered(telegramId: number) {
+  const { data, error } = await createSupabaseServerClient()
+    .from("users")
+    .select("phone")
+    .eq("telegram_id", telegramId)
+    .maybeSingle();
+  if (error) throw error;
+  return Boolean(data?.phone);
 }
 
 async function saveInitialRole(
@@ -200,6 +220,14 @@ export async function POST(request: NextRequest) {
     if (!message || !user) return NextResponse.json({ ok: true });
 
     if (message.text?.startsWith("/start")) {
+      if (await isRegistered(user.id)) {
+        await sendTelegramBotMessage(
+          message.chat.id,
+          `Xush kelibsiz, ${fullName(user)}! 👋\n\nJobTop’dagi ishlaringizni davom ettirishingiz mumkin.`,
+          openAppKeyboard,
+        );
+        return NextResponse.json({ ok: true });
+      }
       await sendTelegramBotMessage(
         message.chat.id,
         `Assalomu alaykum, ${fullName(user)}! 👋\n\nJobTop’da qaysi rol bilan boshlamoqchisiz? Keyin profilingizdan ikkinchi rolni ham qo‘sha olasiz.`,
@@ -221,8 +249,13 @@ export async function POST(request: NextRequest) {
       await registerContact(user, message.contact.phone_number);
       await sendTelegramBotMessage(
         message.chat.id,
-        "Rahmat! Siz JobTop’da ro‘yxatdan o‘tdingiz. ✅\n\nEndi Open App tugmasi orqali ishlarni ko‘rishingiz yoki e’lon berishingiz mumkin.",
+        "Rahmat! Siz JobTop’da ro‘yxatdan o‘tdingiz. ✅",
         removeKeyboard,
+      );
+      await sendTelegramBotMessage(
+        message.chat.id,
+        "Endi platformaga kirib, ishlarni ko‘rishingiz yoki e’lon berishingiz mumkin.",
+        openAppKeyboard,
       );
       return NextResponse.json({ ok: true });
     }
