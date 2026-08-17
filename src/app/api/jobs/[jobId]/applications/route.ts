@@ -21,7 +21,7 @@ export async function GET(
     const { data, error } = await supabase
       .from("applications")
       .select(
-        "id, status, note, created_at, worker:users!applications_worker_id_fkey(id, full_name, telegram_username, district, birth_date, experience_years, about)",
+        "id, status, note, created_at, worker:users!applications_worker_id_fkey(id, full_name, telegram_username, phone, district, birth_date, experience_years, about)",
       )
       .eq("job_id", jobId)
       .order("created_at", { ascending: false });
@@ -34,7 +34,22 @@ export async function GET(
       .eq("job_id", jobId)
       .order("created_at", { ascending: false });
     if (groupError) throw groupError;
-    return NextResponse.json({ applications: data, groupApplications });
+    const applications = (data ?? []).map((application) => {
+      const worker = Array.isArray(application.worker)
+        ? (application.worker[0] ?? null)
+        : application.worker;
+
+      return {
+        ...application,
+        worker: worker
+          ? {
+              ...worker,
+              phone: application.status === "selected" ? worker.phone : null,
+            }
+          : null,
+      };
+    });
+    return NextResponse.json({ applications, groupApplications });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Arizalarni yuklab bo‘lmadi";

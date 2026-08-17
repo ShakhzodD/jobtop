@@ -7,6 +7,7 @@ export type EmployerApplication = {
     id: string;
     fullName: string;
     telegramUsername: string | null;
+    phone: string | null;
     district: string | null;
     birthDate: string | null;
     experienceYears: number | null;

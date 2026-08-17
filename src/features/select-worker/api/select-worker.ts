@@ -9,7 +9,7 @@ export async function selectWorker(applicationId: string) {
     headers: { "x-telegram-init-data": initData },
   });
   const body = (await response.json()) as {
-    application?: { id: string; status: string };
+    application?: { id: string; status: string; phone: string | null };
     error?: string;
   };
   if (!response.ok) throw new Error(body.error ?? "Nomzodni tanlab bo‘lmadi");

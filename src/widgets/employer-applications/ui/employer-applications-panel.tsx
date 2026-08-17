@@ -6,6 +6,7 @@ import {
   Check,
   ClipboardList,
   MapPin,
+  Phone,
   UsersRound,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -94,11 +95,19 @@ export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
     setBusyApplicationId(application.id);
     setError("");
     try {
-      await selectWorker(application.id);
+      const selectedApplication = await selectWorker(application.id);
       setApplications(
         (current) =>
           current?.map((item) =>
-            item.id === application.id ? { ...item, status: "selected" } : item,
+            item.id === application.id
+              ? {
+                  ...item,
+                  status: "selected",
+                  worker: item.worker
+                    ? { ...item.worker, phone: selectedApplication.phone }
+                    : null,
+                }
+              : item,
           ) ?? [],
       );
       setJobs(
@@ -320,6 +329,14 @@ export function EmployerApplicationsPanel({ hideHeader = false }: Props) {
                     <p className="mt-3 text-sm leading-6 text-muted-foreground">
                       {application.worker.about}
                     </p>
+                  )}
+                  {isSelected && application.worker?.phone && (
+                    <a
+                      className="mt-3 flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800"
+                      href={`tel:${application.worker.phone}`}
+                    >
+                      <Phone className="size-4" /> {application.worker.phone}
+                    </a>
                   )}
                   {!isSelected && (
                     <Button

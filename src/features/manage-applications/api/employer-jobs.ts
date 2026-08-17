@@ -39,6 +39,7 @@ export async function getJobApplications(jobId: string): Promise<{
         id: string;
         full_name: string;
         telegram_username: string | null;
+        phone: string | null;
         district: string | null;
         birth_date: string | null;
         experience_years: number | null;
@@ -74,6 +75,7 @@ export async function getJobApplications(jobId: string): Promise<{
             id: application.worker.id,
             fullName: application.worker.full_name,
             telegramUsername: application.worker.telegram_username,
+            phone: application.worker.phone,
             district: application.worker.district,
             birthDate: application.worker.birth_date,
             experienceYears: application.worker.experience_years,

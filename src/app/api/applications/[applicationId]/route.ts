@@ -8,7 +8,7 @@ type ApplicationWithJob = {
   job_id: string;
   status: string;
   jobs: { employer_id: string; openings: number; title: string } | null;
-  worker: { telegram_id: number } | null;
+  worker: { telegram_id: number; phone: string | null } | null;
 };
 
 export async function PATCH(
@@ -22,7 +22,7 @@ export async function PATCH(
     const { data: rawApplication, error: applicationError } = await supabase
       .from("applications")
       .select(
-        "id, job_id, status, jobs!applications_job_id_fkey(employer_id, openings, title), worker:users!applications_worker_id_fkey(telegram_id)",
+        "id, job_id, status, jobs!applications_job_id_fkey(employer_id, openings, title), worker:users!applications_worker_id_fkey(telegram_id, phone)",
       )
       .eq("id", applicationId)
       .maybeSingle();
@@ -32,7 +32,11 @@ export async function PATCH(
       return NextResponse.json({ error: "Ruxsat yo‘q" }, { status: 403 });
     if (application.status === "selected")
       return NextResponse.json({
-        application: { id: application.id, status: "selected" },
+        application: {
+          id: application.id,
+          status: "selected",
+          phone: application.worker?.phone ?? null,
+        },
       });
 
     const { count, error: countError } = await supabase
@@ -76,7 +80,9 @@ export async function PATCH(
     }
     void Promise.all(notifications).catch(() => undefined);
 
-    return NextResponse.json({ application: data });
+    return NextResponse.json({
+      application: { ...data, phone: application.worker?.phone ?? null },
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Nomzod tanlab bo‘lmadi";
