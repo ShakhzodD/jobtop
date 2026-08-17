@@ -45,7 +45,7 @@ export function JobFeed({
   }, [hasMore, isLoadingMore, onLoadMore]);
 
   return (
-    <section className="pt-7" aria-label={title}>
+    <section className="pt-7 pb-10" aria-label={title}>
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold tracking-tight">{title}</h2>
         <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-bold text-muted-foreground">
