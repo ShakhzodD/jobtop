@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
     const { jobId, note } = await request.json() as { jobId?: unknown; note?: unknown };
     if (typeof jobId !== "string") return NextResponse.json({ error: "jobId is required" }, { status: 400 });
     const user = await getCurrentUserFromRequest(request);
+    if (user.activeRole !== "worker") return NextResponse.json({ error: "Ariza yuborish uchun ishchi rolini tanlang" }, { status: 400 });
     const supabase = createSupabaseServerClient();
     const { data: job, error: jobError } = await supabase.from("jobs").select("id, employer_id, status").eq("id", jobId).maybeSingle();
     if (jobError) throw jobError;

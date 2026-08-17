@@ -24,3 +24,12 @@ export async function sendTelegramBotMessage(
 
   if (!response.ok) throw new Error("Unable to send Telegram bot message");
 }
+
+export async function answerTelegramCallbackQuery(callbackQueryId: string) {
+  const response = await fetch(`https://api.telegram.org/bot${getBotToken()}/answerCallbackQuery`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ callback_query_id: callbackQueryId }),
+  });
+  if (!response.ok) throw new Error("Unable to answer Telegram callback query");
+}
