@@ -45,6 +45,11 @@ e’lonlarda ishchi manba havolasiga o‘tadi, JobTop ichida ariza yubormaydi.
 }
 ```
 
+Telegram kanalidan yangi postlarni olish uchun botni kanalga administrator qilib
+qo‘shing va kanal username’ini `AI_IMPORT_CHANNEL_USERNAMES` ga kiriting.
+Masalan: `AI_IMPORT_CHANNEL_USERNAMES=kunlikishlaruz24`. Faqat shu ro‘yxatdagi
+public kanallarning yangi matnli postlari import qilinadi.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

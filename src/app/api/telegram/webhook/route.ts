@@ -11,6 +11,7 @@ import {
   addUserRole,
   setActiveUserRole,
 } from "@/entities/user/api/user-role-repository.server";
+import { importExternalJob } from "@/features/ai-job-import/api/import-external-job.server";
 
 type TelegramUser = {
   id: number;
@@ -20,9 +21,16 @@ type TelegramUser = {
 };
 
 type TelegramMessage = {
-  chat: { id: number };
+  chat: {
+    id: number;
+    type?: string;
+    username?: string;
+    title?: string;
+  };
   from?: TelegramUser;
   text?: string;
+  caption?: string;
+  message_id?: number;
   contact?: { phone_number: string; user_id?: number };
 };
 
@@ -34,6 +42,7 @@ type TelegramCallback = {
 };
 type TelegramUpdate = {
   message?: TelegramMessage;
+  channel_post?: TelegramMessage;
   callback_query?: TelegramCallback;
 };
 
@@ -69,6 +78,45 @@ function fullName(user: TelegramUser) {
     [user.first_name, user.last_name].filter(Boolean).join(" ") ||
     "JobTop foydalanuvchisi"
   );
+}
+
+function getAllowedImportChannelUsernames() {
+  return new Set(
+    (process.env.AI_IMPORT_CHANNEL_USERNAMES ?? "")
+      .split(",")
+      .map((username) => username.trim().replace(/^@/, "").toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+async function handleChannelPost(post: TelegramMessage) {
+  const username = post.chat.username?.toLowerCase();
+  const text = post.text?.trim() || post.caption?.trim();
+  if (!username || !text || !post.message_id) return;
+  if (!getAllowedImportChannelUsernames().has(username)) return;
+
+  const channelUrl = `https://t.me/${username}`;
+  try {
+    const result = await importExternalJob(
+      { name: `@${username}`, url: channelUrl },
+      {
+        externalId: `${post.chat.id}:${post.message_id}`,
+        url: `${channelUrl}/${post.message_id}`,
+        text,
+      },
+    );
+    console.info("Telegram channel post import finished", {
+      channel: username,
+      messageId: post.message_id,
+      result,
+    });
+  } catch (error) {
+    console.error("Telegram channel post import failed", {
+      channel: username,
+      messageId: post.message_id,
+      error,
+    });
+  }
 }
 
 async function registerContact(user: TelegramUser, phone: string) {
@@ -186,6 +234,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const update = (await request.json()) as TelegramUpdate;
+    if (update.channel_post) {
+      await handleChannelPost(update.channel_post);
+      return NextResponse.json({ ok: true });
+    }
     const callback = update.callback_query;
     if (callback?.data?.startsWith("moderation:")) {
       const [, jobId, action] = callback.data.split(":");
