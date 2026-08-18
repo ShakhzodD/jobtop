@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/import-jobs?source=olx",
-      "schedule": "0 * * * *"
+      "schedule": "0 8 * * *"
     }
   ]
 }
